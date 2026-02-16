@@ -1,7 +1,9 @@
 use crate::client::ArkyClient;
+use crate::commands::{merge_data, parse_data};
 use crate::error::{CliError, Result};
 use crate::output::Format;
 use clap::Subcommand;
+use serde_json::json;
 
 #[derive(Subcommand, Debug)]
 pub enum MediaCommand {
@@ -50,6 +52,20 @@ pub enum MediaCommand {
         sort_field: Option<String>,
         #[arg(long)]
         sort_direction: Option<String>,
+    },
+    /// Update media metadata (title, alt text, description)
+    #[command(long_about = "Update metadata for an uploaded media file.\n\n\
+        Optional (--data JSON):\n\
+          title        Display title\n\
+          alt          Alt text for accessibility\n\
+          description  Long description\n\n\
+        Example:\n\
+        arky media update MEDIA_ID --data '{\"title\": \"Company Logo\", \"alt\": \"Logo of our company\"}'")]
+    Update {
+        /// Media ID
+        id: String,
+        #[arg(long, help = "JSON data: inline, @file, or - for stdin")]
+        data: Option<String>,
     },
     /// Delete a media file
     Delete {
@@ -116,6 +132,15 @@ pub async fn handle(cmd: MediaCommand, client: &ArkyClient, format: &Format) -> 
                 params.iter().map(|(k, v)| (*k, v.as_str())).collect();
             let result = client
                 .get(&format!("/v1/businesses/{biz_id}/media"), &params_ref)
+                .await?;
+            crate::output::print_output(&result, format);
+        }
+        MediaCommand::Update { id, data } => {
+            let mut body = json!({});
+            let overlay = parse_data(data.as_deref())?;
+            merge_data(&mut body, overlay);
+            let result = client
+                .put(&format!("/v1/businesses/{biz_id}/media/{id}"), &body)
                 .await?;
             crate::output::print_output(&result, format);
         }

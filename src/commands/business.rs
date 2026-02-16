@@ -60,6 +60,123 @@ pub enum BusinessCommand {
         /// Business ID
         id: String,
     },
+    /// Get parent businesses in hierarchy
+    #[command(long_about = "Fetch parent businesses in the hierarchy.\n\n\
+        Example:\n\
+        arky business parents")]
+    Parents,
+    /// Trigger a rebuild/deploy of the business
+    #[command(name = "trigger-builds", long_about = "Trigger a rebuild/deploy for the business.\n\n\
+        Example:\n\
+        arky business trigger-builds")]
+    TriggerBuilds,
+    /// List available subscription plans
+    Plans,
+    /// Get current subscription details
+    Subscription,
+    /// Subscribe to a plan (creates Stripe checkout)
+    #[command(long_about = "Subscribe the business to a plan.\n\n\
+        Required (--data JSON):\n\
+          planId      Plan ID to subscribe to\n\
+          successUrl  Redirect URL on successful payment\n\
+          cancelUrl   Redirect URL on cancelled payment\n\n\
+        Example:\n\
+        arky business subscribe --data '{\"planId\": \"plan_123\", \"successUrl\": \"https://...\", \"cancelUrl\": \"https://...\"}'")]
+    Subscribe {
+        #[arg(long, help = "JSON data: inline, @file, or - for stdin")]
+        data: Option<String>,
+    },
+    /// Create a Stripe billing portal session
+    #[command(long_about = "Create a Stripe billing portal session for managing subscription.\n\n\
+        Required (--data JSON):\n\
+          returnUrl   URL to return to after portal session\n\n\
+        Example:\n\
+        arky business portal --data '{\"returnUrl\": \"https://...\"}'")]
+    Portal {
+        #[arg(long, help = "JSON data: inline, @file, or - for stdin")]
+        data: Option<String>,
+    },
+    /// Invite a user to the business team
+    #[command(long_about = "Send an invitation to join the business.\n\n\
+        Required:\n\
+          --email   Email address of the person to invite\n\n\
+        Optional:\n\
+          --role    Role to assign (default: member)\n\n\
+        Example:\n\
+        arky business invite --email user@example.com --role admin")]
+    Invite {
+        #[arg(long)]
+        email: String,
+        #[arg(long)]
+        role: Option<String>,
+    },
+    /// Remove a member from the business team
+    #[command(name = "remove-member", long_about = "Remove a team member from the business.\n\n\
+        Required:\n\
+          --account-id   Account ID of the member to remove\n\n\
+        Example:\n\
+        arky business remove-member --account-id ACC_ID")]
+    RemoveMember {
+        #[arg(long)]
+        account_id: String,
+    },
+    /// Accept or reject a business invitation
+    #[command(name = "handle-invitation", long_about = "Accept or reject an invitation to join a business.\n\n\
+        Required:\n\
+          --token    Invitation token\n\
+          --action   \"accept\" or \"reject\"\n\n\
+        Example:\n\
+        arky business handle-invitation --token INV_TOKEN --action accept")]
+    HandleInvitation {
+        #[arg(long)]
+        token: String,
+        #[arg(long)]
+        action: String,
+    },
+    /// Test a webhook configuration
+    #[command(name = "test-webhook", long_about = "Send a test event to a webhook URL.\n\n\
+        Required (--data JSON):\n\
+          url      Webhook URL to test\n\
+          events   Array of event types to include\n\n\
+        Example:\n\
+        arky business test-webhook --data '{\"url\": \"https://...\", \"events\": [\"order.paid\"]}'")]
+    TestWebhook {
+        #[arg(long, help = "JSON data: inline, @file, or - for stdin")]
+        data: Option<String>,
+    },
+    /// Process a refund
+    #[command(long_about = "Process a refund for an order or booking.\n\n\
+        Required (--data JSON):\n\
+          entity   Entity ID (order or booking ID)\n\
+          amount   Refund amount in cents\n\n\
+        Example:\n\
+        arky business refund --data '{\"entity\": \"order_123\", \"amount\": 2999}'")]
+    Refund {
+        #[arg(long, help = "JSON data: inline, @file, or - for stdin")]
+        data: Option<String>,
+    },
+    /// Connect an OAuth provider
+    #[command(name = "oauth-connect", long_about = "Connect an OAuth provider to the business.\n\n\
+        Required (--data JSON):\n\
+          provider     OAuth provider name (e.g. \"google\", \"stripe\")\n\
+          code         Authorization code from OAuth flow\n\
+          redirectUri  Redirect URI used in the OAuth flow\n\n\
+        Example:\n\
+        arky business oauth-connect --data '{\"provider\": \"google\", \"code\": \"AUTH_CODE\", \"redirectUri\": \"https://...\"}'")]
+    OauthConnect {
+        #[arg(long, help = "JSON data: inline, @file, or - for stdin")]
+        data: Option<String>,
+    },
+    /// Disconnect an OAuth provider
+    #[command(name = "oauth-disconnect", long_about = "Disconnect an OAuth provider from the business.\n\n\
+        Required:\n\
+          --provider   OAuth provider name to disconnect\n\n\
+        Example:\n\
+        arky business oauth-disconnect --provider google")]
+    OauthDisconnect {
+        #[arg(long)]
+        provider: String,
+    },
 }
 
 pub async fn handle(cmd: BusinessCommand, client: &ArkyClient, format: &Format) -> Result<()> {
@@ -104,6 +221,116 @@ pub async fn handle(cmd: BusinessCommand, client: &ArkyClient, format: &Format) 
             let result = client.delete(&format!("/v1/businesses/{id}")).await?;
             crate::output::print_output(&result, format);
             crate::output::print_success("Business deleted");
+        }
+        BusinessCommand::Parents => {
+            let biz_id = client.require_business_id()?;
+            let result = client
+                .get(&format!("/v1/businesses/{biz_id}/parents"), &[])
+                .await?;
+            crate::output::print_output(&result, format);
+        }
+        BusinessCommand::TriggerBuilds => {
+            let biz_id = client.require_business_id()?;
+            let result = client
+                .post(&format!("/v1/businesses/{biz_id}/trigger-builds"), &json!({}))
+                .await?;
+            crate::output::print_output(&result, format);
+            crate::output::print_success("Build triggered");
+        }
+        BusinessCommand::Plans => {
+            let result = client.get("/v1/businesses/plans", &[]).await?;
+            crate::output::print_output(&result, format);
+        }
+        BusinessCommand::Subscription => {
+            let biz_id = client.require_business_id()?;
+            let result = client
+                .get(&format!("/v1/businesses/{biz_id}/subscription"), &[])
+                .await?;
+            crate::output::print_output(&result, format);
+        }
+        BusinessCommand::Subscribe { data } => {
+            let biz_id = client.require_business_id()?;
+            let body = parse_data(data.as_deref())?;
+            let result = client
+                .put(&format!("/v1/businesses/{biz_id}/subscribe"), &body)
+                .await?;
+            crate::output::print_output(&result, format);
+        }
+        BusinessCommand::Portal { data } => {
+            let biz_id = client.require_business_id()?;
+            let body = parse_data(data.as_deref())?;
+            let result = client
+                .post(
+                    &format!("/v1/businesses/{biz_id}/subscription/portal"),
+                    &body,
+                )
+                .await?;
+            crate::output::print_output(&result, format);
+        }
+        BusinessCommand::Invite { email, role } => {
+            let biz_id = client.require_business_id()?;
+            let mut body = json!({ "email": email });
+            if let Some(r) = role {
+                body["role"] = json!(r);
+            }
+            let result = client
+                .post(&format!("/v1/businesses/{biz_id}/invitation"), &body)
+                .await?;
+            crate::output::print_output(&result, format);
+            crate::output::print_success(&format!("Invitation sent to {email}"));
+        }
+        BusinessCommand::RemoveMember { account_id } => {
+            let biz_id = client.require_business_id()?;
+            let result = client
+                .delete(&format!(
+                    "/v1/businesses/{biz_id}/members/{account_id}"
+                ))
+                .await?;
+            crate::output::print_output(&result, format);
+            crate::output::print_success("Member removed");
+        }
+        BusinessCommand::HandleInvitation { token, action } => {
+            let biz_id = client.require_business_id()?;
+            let body = json!({ "token": token, "action": action });
+            let result = client
+                .put(&format!("/v1/businesses/{biz_id}/invitation"), &body)
+                .await?;
+            crate::output::print_output(&result, format);
+        }
+        BusinessCommand::TestWebhook { data } => {
+            let biz_id = client.require_business_id()?;
+            let body = parse_data(data.as_deref())?;
+            let result = client
+                .post(&format!("/v1/businesses/{biz_id}/webhooks/test"), &body)
+                .await?;
+            crate::output::print_output(&result, format);
+        }
+        BusinessCommand::Refund { data } => {
+            let biz_id = client.require_business_id()?;
+            let body = parse_data(data.as_deref())?;
+            let result = client
+                .post(&format!("/v1/businesses/{biz_id}/refund"), &body)
+                .await?;
+            crate::output::print_output(&result, format);
+        }
+        BusinessCommand::OauthConnect { data } => {
+            let biz_id = client.require_business_id()?;
+            let body = parse_data(data.as_deref())?;
+            let result = client
+                .post(&format!("/v1/businesses/{biz_id}/oauth/connect"), &body)
+                .await?;
+            crate::output::print_output(&result, format);
+        }
+        BusinessCommand::OauthDisconnect { provider } => {
+            let biz_id = client.require_business_id()?;
+            let body = json!({ "provider": provider });
+            let result = client
+                .post(
+                    &format!("/v1/businesses/{biz_id}/oauth/disconnect"),
+                    &body,
+                )
+                .await?;
+            crate::output::print_output(&result, format);
         }
     }
     Ok(())

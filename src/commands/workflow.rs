@@ -38,8 +38,13 @@ pub enum WorkflowCommand {
     },
     /// Create a workflow
     #[command(long_about = "Create a workflow with DAG-based node execution.\n\n\
-        Workflows are directed acyclic graphs (DAGs) of nodes.\n\
-        Every workflow must have exactly one trigger node.\n\n\
+        Required:\n\
+          KEY (positional)  Workflow key — letters, numbers, _ and - only, max 255 chars.\n\
+          nodes             Object of named nodes (--data). Must include exactly one trigger node.\n\n\
+        Optional (--data JSON):\n\
+          status     \"draft\" (default) | \"active\" | \"archived\"\n\
+          schedule   Cron expression for scheduled triggers\n\n\
+        Workflows are directed acyclic graphs (DAGs) of nodes.\n\n\
         Node types:\n\
           trigger   Entry point. Receives external data when triggered.\n\
                     Fields: event, schema (Block[] for input validation), delayMs\n\n\
@@ -110,7 +115,10 @@ pub enum WorkflowCommand {
     },
     /// Update a workflow
     #[command(long_about = "Update a workflow by ID.\n\n\
-        Node structure replaces entirely. Include all nodes.\n\n\
+        Optional (--data JSON):\n\
+          nodes      Node map — REPLACES entirely, include all nodes (must have 1 trigger)\n\
+          status     \"draft\" | \"active\" | \"archived\"\n\
+          schedule   Cron expression for scheduled triggers\n\n\
         Example:\n\
         arky workflow update WF_ID --data '{\"nodes\": {...}, \"status\": \"active\"}'")]
     Update {

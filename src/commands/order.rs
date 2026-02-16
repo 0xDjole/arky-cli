@@ -43,9 +43,21 @@ pub enum OrderCommand {
     /// Create an order manually
     #[command(long_about = "Create an order manually (admin use).\n\n\
         For normal checkout flow, use `arky order checkout` instead.\n\n\
+        Required (--data JSON):\n\
+          items    At least one order item (see fields below).\n\
+          market   Market identifier (e.g. \"us\", \"eu\")\n\n\
+        Optional:\n\
+          status           \"pending\" (default) | \"paid\" | \"shipped\" | \"delivered\" | \"cancelled\" | \"refunded\"\n\
+          shippingAddress  {\"name\": \"...\", \"street1\": \"...\", \"city\": \"...\", \"country\": \"...\"}\n\
+          billingAddress   Same shape, or {\"sameAsShipping\": true}\n\n\
+        Item fields:\n\
+          productId   Product ID (required)\n\
+          variantKey  Variant key, e.g. \"default\", \"small\" (required)\n\
+          quantity    Number of units (required)\n\n\
         Example:\n\
         arky order create --data '{\n\
           \"items\": [{\"productId\": \"prod_123\", \"variantKey\": \"default\", \"quantity\": 1}],\n\
+          \"market\": \"us\",\n\
           \"status\": \"paid\"\n\
         }'")]
     Create {
@@ -54,6 +66,8 @@ pub enum OrderCommand {
     },
     /// Update an order
     #[command(long_about = "Update an order (e.g., change status, add notes).\n\n\
+        Optional (--data JSON):\n\
+          status   \"pending\" | \"paid\" | \"shipped\" | \"delivered\" | \"cancelled\" | \"refunded\"\n\n\
         Example:\n\
         arky order update ORDER_ID --data '{\"status\": \"shipped\"}'")]
     Update {
@@ -65,6 +79,13 @@ pub enum OrderCommand {
     /// Get a price quote for items
     #[command(long_about = "Calculate prices for a set of items without creating an order.\n\n\
         Use this to preview totals, taxes, and discounts before checkout.\n\n\
+        Required (--data JSON):\n\
+          items    At least one item (productId, variantKey, quantity).\n\
+          market   Market identifier (e.g. \"us\")\n\n\
+        Optional:\n\
+          promoCode         Promo code string\n\
+          shippingAddress   For shipping cost calculation\n\
+          shippingMethodId  Shipping method ID\n\n\
         Example:\n\
         arky order quote --data '{\n\
           \"items\": [{\"productId\": \"prod_123\", \"variantKey\": \"default\", \"quantity\": 2}],\n\
@@ -80,7 +101,21 @@ pub enum OrderCommand {
     },
     /// Checkout: create order and process payment
     #[command(long_about = "Create an order and process payment in one step.\n\n\
-        This is the primary purchase flow. Provide items, payment method, and addresses.\n\n\
+        This is the primary purchase flow.\n\n\
+        Required (--data JSON):\n\
+          items    At least one item (productId, variantKey, quantity).\n\n\
+        Optional:\n\
+          market            Market identifier (auto-set from business if omitted)\n\
+          paymentMethodId   Payment method ID\n\
+          shippingAddress   {\"name\": \"...\", \"street1\": \"...\", \"city\": \"...\", \"state\": \"...\",\n\
+                            \"postalCode\": \"...\", \"country\": \"US\"}\n\
+          billingAddress    Same shape, or {\"sameAsShipping\": true}\n\
+          promoCodeId       Promo code ID for discount\n\
+          shippingMethodId  Shipping method ID\n\n\
+        Item fields:\n\
+          productId   Product ID (required)\n\
+          variantKey  Variant key (required)\n\
+          quantity    Number of units (required)\n\n\
         Example:\n\
         arky order checkout --data '{\n\
           \"items\": [{\"productId\": \"prod_123\", \"variantKey\": \"default\", \"quantity\": 1}],\n\

@@ -49,6 +49,17 @@ pub enum BookingCommand {
     /// Create a booking directly (admin use)
     #[command(long_about = "Create a booking directly (bypasses checkout flow).\n\n\
         For customer-facing booking with payment, use `arky booking checkout`.\n\n\
+        Required (--data JSON):\n\
+          items    At least one booking item (see fields below).\n\n\
+        Optional:\n\
+          market           Market identifier (defaults to \"default\")\n\
+          paymentMethodId  Payment method ID\n\
+          promoCode        Promo code string\n\n\
+        Item fields:\n\
+          serviceId   Service ID (required)\n\
+          providerId  Provider ID (required)\n\
+          from        Start time as epoch milliseconds (required)\n\
+          to          End time as epoch milliseconds (required)\n\n\
         Example:\n\
         arky booking create --data '{\n\
           \"items\": [{\n\
@@ -65,6 +76,8 @@ pub enum BookingCommand {
     },
     /// Update a booking
     #[command(long_about = "Update a booking (e.g., change status, reschedule).\n\n\
+        Optional (--data JSON):\n\
+          status   \"pending\" | \"confirmed\" | \"cancelled\" | \"completed\"\n\n\
         Example:\n\
         arky booking update BOOKING_ID --data '{\"status\": \"cancelled\"}'")]
     Update {
@@ -76,6 +89,10 @@ pub enum BookingCommand {
     /// Get a booking price quote
     #[command(long_about = "Calculate prices for a booking without creating it.\n\n\
         Use to preview pricing, availability, and totals.\n\n\
+        Required (--data JSON):\n\
+          items    At least one booking item (serviceId, providerId, from, to).\n\n\
+        Optional:\n\
+          market   Market identifier (defaults to \"default\")\n\n\
         Example:\n\
         arky booking quote --data '{\n\
           \"items\": [{\n\
@@ -93,6 +110,11 @@ pub enum BookingCommand {
     /// Checkout: create booking and process payment
     #[command(long_about = "Create a booking with payment in one step.\n\n\
         This is the primary booking flow for customers.\n\n\
+        Required (--data JSON):\n\
+          items    At least one booking item (serviceId, providerId, from, to).\n\n\
+        Optional:\n\
+          market           Market identifier (defaults to \"default\")\n\
+          paymentMethodId  Payment method ID for charging\n\n\
         Example:\n\
         arky booking checkout --data '{\n\
           \"items\": [{\n\

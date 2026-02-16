@@ -566,6 +566,235 @@ fn test_order_quote_and_create() {
     arky().args(["product", "delete", product_id]).assert().success();
 }
 
+// ── Platform ───────────────────────────────────────────────
+
+#[test]
+#[ignore]
+fn test_platform_currencies() {
+    let val = json_output(&mut arky().args(["platform", "currencies"]));
+    // Should return an array or object with currency data
+    assert!(
+        val.is_array() || val.is_object(),
+        "Currencies should return data. Got: {val}"
+    );
+}
+
+#[test]
+#[ignore]
+fn test_platform_integrations() {
+    let val = json_output(&mut arky().args(["platform", "integrations"]));
+    assert!(
+        val.is_array() || val.is_object(),
+        "Integrations should return data. Got: {val}"
+    );
+}
+
+#[test]
+#[ignore]
+fn test_platform_countries() {
+    let val = json_output(&mut arky().args(["platform", "countries"]));
+    assert!(
+        val.is_array() || val.get("items").is_some(),
+        "Countries should return data. Got: {val}"
+    );
+}
+
+#[test]
+#[ignore]
+fn test_platform_country_us() {
+    let val = json_output(&mut arky().args(["platform", "country", "US"]));
+    assert!(
+        val.get("code").is_some() || val.get("name").is_some(),
+        "Country should have code or name. Got: {val}"
+    );
+}
+
+#[test]
+#[ignore]
+fn test_platform_webhook_events() {
+    let val = json_output(&mut arky().args(["platform", "webhook-events"]));
+    assert!(
+        val.is_array() || val.is_object(),
+        "Webhook events should return data. Got: {val}"
+    );
+}
+
+// ── Account ────────────────────────────────────────────────
+
+#[test]
+#[ignore]
+fn test_account_search() {
+    let val = json_output(
+        &mut arky().args(["account", "search", "--limit", "5"]),
+    );
+    assert!(has_list_items(&val), "Account search should return list. Got: {val}");
+}
+
+// ── Notification ───────────────────────────────────────────
+
+#[test]
+#[ignore]
+fn test_notification_delivery_stats() {
+    let val = json_output(
+        &mut arky().args(["notification", "delivery-stats"]),
+    );
+    // Should return stats object (may be empty for dev)
+    assert!(val.is_object(), "Delivery stats should return object. Got: {val}");
+}
+
+// ── Business Extended ──────────────────────────────────────
+
+#[test]
+#[ignore]
+fn test_business_parents() {
+    let val = json_output(&mut arky().args(["business", "parents"]));
+    // Parents can be an empty array or list of businesses
+    assert!(
+        val.is_array() || val.is_object(),
+        "Parents should return data. Got: {val}"
+    );
+}
+
+#[test]
+#[ignore]
+fn test_business_plans() {
+    let val = json_output(&mut arky().args(["business", "plans"]));
+    assert!(
+        val.is_array() || val.is_object(),
+        "Plans should return data. Got: {val}"
+    );
+}
+
+// ── Media Update ───────────────────────────────────────────
+
+#[test]
+#[ignore]
+fn test_media_upload_update_delete() {
+    // 1x1 PNG
+    let png_data: Vec<u8> = vec![
+        0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A,
+        0x00, 0x00, 0x00, 0x0D, 0x49, 0x48, 0x44, 0x52,
+        0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01,
+        0x08, 0x02, 0x00, 0x00, 0x00, 0x90, 0x77, 0x53,
+        0xDE, 0x00, 0x00, 0x00, 0x0C, 0x49, 0x44, 0x41,
+        0x54, 0x08, 0xD7, 0x63, 0xF8, 0xCF, 0xC0, 0x00,
+        0x00, 0x00, 0x02, 0x00, 0x01, 0xE2, 0x21, 0xBC,
+        0x33, 0x00, 0x00, 0x00, 0x00, 0x49, 0x45, 0x4E,
+        0x44, 0xAE, 0x42, 0x60, 0x82,
+    ];
+
+    let tmp_dir = tempfile::tempdir().unwrap();
+    let file_path = tmp_dir.path().join("test-update-media.png");
+    let mut file = std::fs::File::create(&file_path).unwrap();
+    file.write_all(&png_data).unwrap();
+    drop(file);
+
+    // Upload
+    let val = json_output(
+        arky().args(["media", "upload", file_path.to_str().unwrap()]),
+    );
+    let items = val.as_array().expect("Upload should return array");
+    let media_id = items[0]["id"].as_str().expect("Media should have id");
+
+    // Update metadata
+    let update_data = serde_json::json!({
+        "title": "Test Upload Title",
+        "alt": "Alt text for test image"
+    });
+    let val = json_output(
+        arky().args(["media", "update", media_id, "--data", &update_data.to_string()]),
+    );
+    assert!(val.is_object(), "Media update should return object");
+
+    // Cleanup
+    arky().args(["media", "delete", media_id]).assert().success();
+}
+
+// ── Audience Subscribers ───────────────────────────────────
+
+#[test]
+#[ignore]
+fn test_audience_subscriber_flow() {
+    let key = format!("cli-test-aud-sub-{}", ts_ms());
+
+    let create_data = serde_json::json!({ "prices": [] });
+
+    // Create audience
+    let val = json_output(
+        arky().args(["audience", "create", &key, "--data", &create_data.to_string()]),
+    );
+    let audience_id = val["id"].as_str().expect("Audience should have id");
+
+    // Add subscriber
+    let val = json_output(
+        arky().args([
+            "audience", "add-subscriber", audience_id,
+            "--email", "cli-test@example.com",
+        ]),
+    );
+    assert!(val.is_object(), "Add subscriber should return object. Got: {val}");
+
+    // List subscribers — should have at least one
+    let val = json_output(
+        &mut arky().args(["audience", "subscribers", audience_id]),
+    );
+    assert!(has_list_items(&val), "Should have subscriber data. Got: {val}");
+
+    // Cleanup
+    arky().args(["audience", "delete", audience_id]).assert().success();
+}
+
+// ── Event List ─────────────────────────────────────────────
+
+#[test]
+#[ignore]
+fn test_event_list() {
+    // Create an order to generate events, then list them
+    // First get a product to create an order with
+    let key = format!("cli-test-evt-product-{}", ts_ms());
+    let product_data = serde_json::json!({
+        "slug": {"en": &key},
+        "status": "active",
+        "audienceIds": [],
+        "networkIds": [],
+        "filters": [],
+        "blocks": [
+            {"type": "localized_text", "id": uuid(), "key": "title", "properties": {}, "value": {"en": "Event Test Product"}}
+        ],
+        "variants": [{
+            "key": "default",
+            "prices": [{"currency": "usd", "market": "us", "amount": 999}],
+            "inventory": [{"locationId": "default", "available": 50, "reserved": 0}],
+            "attributes": []
+        }]
+    });
+    let product = json_output(
+        arky().args(["product", "create", &key, "--data", &product_data.to_string()]),
+    );
+    let product_id = product["id"].as_str().expect("product id");
+    let variant_id = product["variants"][0]["id"].as_str().expect("variant id");
+
+    // Create order to generate events
+    let order_data = serde_json::json!({
+        "market": "us",
+        "items": [{"productId": product_id, "variantId": variant_id, "quantity": 1}],
+        "blocks": []
+    });
+    let order = json_output(
+        arky().args(["order", "create", "--data", &order_data.to_string()]),
+    );
+    let order_id = order["id"].as_str().expect("order id");
+
+    // List events for this order
+    let val = json_output(
+        &mut arky().args(["event", "list", order_id, "--limit", "10"]),
+    );
+    assert!(has_list_items(&val), "Events should return list. Got: {val}");
+
+    // Cleanup
+    arky().args(["product", "delete", product_id]).assert().success();
+}
+
 // ── Error handling ──────────────────────────────────────────
 
 #[test]

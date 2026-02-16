@@ -6,11 +6,13 @@ mod output;
 
 use clap::{Parser, Subcommand};
 use commands::{
-    audience::AudienceCommand, auth::AuthCommand, booking::BookingCommand,
-    business::BusinessCommand, config_cmd::ConfigCommand, database::DatabaseCommand,
-    event::EventCommand, media::MediaCommand, node::NodeCommand, order::OrderCommand,
-    product::ProductCommand, promo_code::PromoCodeCommand, provider::ProviderCommand,
-    service::ServiceCommand, shipping::ShippingCommand, workflow::WorkflowCommand,
+    account::AccountCommand, audience::AudienceCommand, auth::AuthCommand,
+    booking::BookingCommand, business::BusinessCommand, config_cmd::ConfigCommand,
+    database::DatabaseCommand, event::EventCommand, media::MediaCommand,
+    network::NetworkCommand, node::NodeCommand, notification::NotificationCommand,
+    order::OrderCommand, platform::PlatformCommand, product::ProductCommand,
+    promo_code::PromoCodeCommand, provider::ProviderCommand, service::ServiceCommand,
+    shipping::ShippingCommand, workflow::WorkflowCommand,
 };
 
 /// Arky CLI — control the Arky platform from your terminal.
@@ -176,10 +178,30 @@ enum Command {
         #[command(subcommand)]
         cmd: ShippingCommand,
     },
-    /// View event history
+    /// View and manage events
     Event {
         #[command(subcommand)]
         cmd: EventCommand,
+    },
+    /// Manage your account
+    Account {
+        #[command(subcommand)]
+        cmd: AccountCommand,
+    },
+    /// Platform info: currencies, countries, integrations
+    Platform {
+        #[command(subcommand)]
+        cmd: PlatformCommand,
+    },
+    /// Search across networks
+    Network {
+        #[command(subcommand)]
+        cmd: NetworkCommand,
+    },
+    /// Notification & email tracking
+    Notification {
+        #[command(subcommand)]
+        cmd: NotificationCommand,
     },
 }
 
@@ -219,6 +241,12 @@ async fn main() {
         Command::PromoCode { cmd } => commands::promo_code::handle(cmd, &client, &format).await,
         Command::Shipping { cmd } => commands::shipping::handle(cmd, &client, &format).await,
         Command::Event { cmd } => commands::event::handle(cmd, &client, &format).await,
+        Command::Account { cmd } => commands::account::handle(cmd, &client, &format).await,
+        Command::Platform { cmd } => commands::platform::handle(cmd, &client, &format).await,
+        Command::Network { cmd } => commands::network::handle(cmd, &client, &format).await,
+        Command::Notification { cmd } => {
+            commands::notification::handle(cmd, &client, &format).await
+        }
     };
 
     if let Err(e) = result {

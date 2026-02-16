@@ -297,7 +297,166 @@ fn test_event_help() {
         .args(["event", "--help"])
         .assert()
         .success()
-        .stdout(predicate::str::contains("list"));
+        .stdout(predicate::str::contains("list"))
+        .stdout(predicate::str::contains("update"));
+}
+
+#[test]
+fn test_event_update_help_shows_action() {
+    arky()
+        .args(["event", "update", "--help"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("action"))
+        .stdout(predicate::str::contains("order_status_changed"))
+        .stdout(predicate::str::contains("booking_confirmed"));
+}
+
+#[test]
+fn test_account_help() {
+    arky()
+        .args(["account", "--help"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("search"))
+        .stdout(predicate::str::contains("update"))
+        .stdout(predicate::str::contains("delete"))
+        .stdout(predicate::str::contains("add-phone"))
+        .stdout(predicate::str::contains("confirm-phone"));
+}
+
+#[test]
+fn test_account_search_help() {
+    arky()
+        .args(["account", "search", "--help"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("--query"))
+        .stdout(predicate::str::contains("--limit"));
+}
+
+#[test]
+fn test_platform_help() {
+    arky()
+        .args(["platform", "--help"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("currencies"))
+        .stdout(predicate::str::contains("integrations"))
+        .stdout(predicate::str::contains("countries"))
+        .stdout(predicate::str::contains("country"))
+        .stdout(predicate::str::contains("webhook-events"));
+}
+
+#[test]
+fn test_platform_country_help() {
+    arky()
+        .args(["platform", "country", "--help"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("ISO country code"));
+}
+
+#[test]
+fn test_network_help() {
+    arky()
+        .args(["network", "--help"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("search-services"))
+        .stdout(predicate::str::contains("search-products"))
+        .stdout(predicate::str::contains("search-providers"));
+}
+
+#[test]
+fn test_network_search_products_help() {
+    arky()
+        .args(["network", "search-products", "--help"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("--query"))
+        .stdout(predicate::str::contains("--price-from"))
+        .stdout(predicate::str::contains("--price-to"));
+}
+
+#[test]
+fn test_notification_help() {
+    arky()
+        .args(["notification", "--help"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("delivery-stats"));
+}
+
+#[test]
+fn test_business_help_shows_new_commands() {
+    arky()
+        .args(["business", "--help"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("get"))
+        .stdout(predicate::str::contains("list"))
+        .stdout(predicate::str::contains("create"))
+        .stdout(predicate::str::contains("update"))
+        .stdout(predicate::str::contains("delete"))
+        .stdout(predicate::str::contains("parents"))
+        .stdout(predicate::str::contains("trigger-builds"))
+        .stdout(predicate::str::contains("plans"))
+        .stdout(predicate::str::contains("subscription"))
+        .stdout(predicate::str::contains("subscribe"))
+        .stdout(predicate::str::contains("portal"))
+        .stdout(predicate::str::contains("invite"))
+        .stdout(predicate::str::contains("remove-member"))
+        .stdout(predicate::str::contains("handle-invitation"))
+        .stdout(predicate::str::contains("test-webhook"))
+        .stdout(predicate::str::contains("refund"))
+        .stdout(predicate::str::contains("oauth-connect"))
+        .stdout(predicate::str::contains("oauth-disconnect"));
+}
+
+#[test]
+fn test_media_help_shows_update() {
+    arky()
+        .args(["media", "--help"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("update"))
+        .stdout(predicate::str::contains("upload"))
+        .stdout(predicate::str::contains("list"))
+        .stdout(predicate::str::contains("delete"));
+}
+
+#[test]
+fn test_media_update_help() {
+    arky()
+        .args(["media", "update", "--help"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("title"))
+        .stdout(predicate::str::contains("alt"));
+}
+
+#[test]
+fn test_audience_help_shows_subscriber_commands() {
+    arky()
+        .args(["audience", "--help"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("add-subscriber"))
+        .stdout(predicate::str::contains("remove-subscriber"))
+        .stdout(predicate::str::contains("subscribers"));
+}
+
+#[test]
+fn test_top_level_help_shows_new_sections() {
+    arky()
+        .arg("--help")
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("account"))
+        .stdout(predicate::str::contains("platform"))
+        .stdout(predicate::str::contains("network"))
+        .stdout(predicate::str::contains("notification"));
 }
 
 // ── Config ──────────────────────────────────────────────────

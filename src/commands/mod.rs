@@ -1,3 +1,4 @@
+pub mod account;
 pub mod auth;
 pub mod audience;
 pub mod booking;
@@ -6,8 +7,11 @@ pub mod config_cmd;
 pub mod database;
 pub mod event;
 pub mod media;
+pub mod network;
 pub mod node;
+pub mod notification;
 pub mod order;
+pub mod platform;
 pub mod product;
 pub mod promo_code;
 pub mod provider;

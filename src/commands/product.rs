@@ -46,15 +46,22 @@ pub enum ProductCommand {
     },
     /// Create a product with blocks, variants, and filters
     #[command(long_about = "Create a product.\n\n\
-        Products use blocks for content and variants for purchasable options.\n\n\
-        Blocks: same as nodes (text, localized_text, markdown, number, boolean,\n\
-        list, map, relationship_entry, relationship_media, geo_location).\n\n\
-        Variants: each variant has a key, prices, and optional inventory.\n\
-          prices: [{\"currency\": \"USD\", \"market\": \"us\", \"amount\": 2999}]\n\
-          amount is in cents (2999 = $29.99)\n\
-          inventoryLevel: number (optional, null = unlimited)\n\n\
-        Filters: categorization for product filtering.\n\
+        Required:\n\
+          KEY (positional)  Product key — letters, numbers, _ and - only, max 255 chars.\n\n\
+        Optional (--data JSON):\n\
+          blocks     Array of content blocks (same types as nodes)\n\
+          variants   Array of purchasable variants (see below)\n\
+          filters    Array of filter categories (see below)\n\
+          status     \"draft\" (default) | \"active\" | \"archived\"\n\n\
+        Variant fields:\n\
+          key             Variant identifier, e.g. \"small\", \"default\" (required)\n\
+          prices          [{\"currency\": \"USD\", \"market\": \"us\", \"amount\": 2999}] (required)\n\
+                          amount is in cents (2999 = $29.99)\n\
+          inventoryLevel  Number (optional, null = unlimited stock)\n\n\
+        Filter fields:\n\
           [{\"key\": \"color\", \"values\": [\"red\", \"blue\"]}]\n\n\
+        Block types: text, localized_text, markdown, number, boolean,\n\
+        list, map, relationship_entry, relationship_media, geo_location.\n\n\
         Examples:\n\
         arky product create t-shirt --data '{\n\
           \"blocks\": [\n\
@@ -77,7 +84,11 @@ pub enum ProductCommand {
     },
     /// Update a product
     #[command(long_about = "Update a product by ID.\n\n\
-        Blocks and variants replace the entire array. Include all you want to keep.\n\n\
+        Optional (--data JSON):\n\
+          blocks     Array of blocks — REPLACES entire array, include all you want to keep\n\
+          variants   Array of variants — REPLACES entire array\n\
+          filters    Array of filters — REPLACES entire array\n\
+          status     \"draft\" | \"active\" | \"archived\"\n\n\
         Example:\n\
         arky product update PROD_ID --data '{\"blocks\": [...], \"variants\": [...]}'\n\
         arky product update PROD_ID --data '{\"status\": \"active\"}'")]

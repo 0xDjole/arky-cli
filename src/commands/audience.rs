@@ -33,11 +33,15 @@ pub enum AudienceCommand {
     },
     /// Create an audience (access group with optional subscription pricing)
     #[command(long_about = "Create an audience for access control and subscriptions.\n\n\
+        Required:\n\
+          KEY (positional)  Audience key — letters, numbers, _ and - only, max 255 chars.\n\n\
+        Optional (--data JSON):\n\
+          blocks   Array of content blocks (same types as nodes)\n\
+          prices   Array of subscription prices for paid tiers\n\n\
         Audiences can be used as:\n\
           - Access groups: gate content behind membership\n\
           - Subscription tiers: charge recurring fees for access\n\
           - Mailing lists: manage subscribers for newsletters\n\n\
-        Blocks: same as nodes (text, localized_text, etc.)\n\n\
         Example:\n\
         arky audience create premium-members --data '{\n\
           \"blocks\": [\n\
@@ -77,6 +81,35 @@ pub enum AudienceCommand {
         limit: u32,
         #[arg(long)]
         cursor: Option<String>,
+    },
+    /// Add a subscriber to an audience by email
+    #[command(name = "add-subscriber", long_about = "Add a subscriber to an audience.\n\n\
+        Required:\n\
+          AUDIENCE_ID (positional)  The audience to add the subscriber to.\n\
+          --email                   Email address of the subscriber.\n\n\
+        If the email is already subscribed, the request is silently skipped.\n\n\
+        Example:\n\
+        arky audience add-subscriber AUDIENCE_ID --email user@example.com")]
+    AddSubscriber {
+        /// Audience ID
+        id: String,
+        /// Subscriber email address
+        #[arg(long)]
+        email: String,
+    },
+    /// Remove a subscriber from an audience
+    #[command(name = "remove-subscriber", long_about = "Remove a subscriber from an audience by account ID.\n\n\
+        Required:\n\
+          AUDIENCE_ID (positional)  The audience to remove from.\n\
+          --account-id              Account ID of the subscriber (from `arky audience subscribers`).\n\n\
+        Example:\n\
+        arky audience remove-subscriber AUDIENCE_ID --account-id ACC_ID")]
+    RemoveSubscriber {
+        /// Audience ID
+        id: String,
+        /// Account ID of the subscriber to remove
+        #[arg(long)]
+        account_id: String,
     },
 }
 
@@ -148,6 +181,25 @@ pub async fn handle(cmd: AudienceCommand, client: &ArkyClient, format: &Format) 
                 )
                 .await?;
             crate::output::print_output(&result, format);
+        }
+        AudienceCommand::AddSubscriber { id, email } => {
+            let body = json!({ "email": email });
+            let result = client
+                .post(
+                    &format!("/v1/businesses/{biz_id}/audiences/{id}/subscribers"),
+                    &body,
+                )
+                .await?;
+            crate::output::print_output(&result, format);
+        }
+        AudienceCommand::RemoveSubscriber { id, account_id } => {
+            let result = client
+                .delete(&format!(
+                    "/v1/businesses/{biz_id}/audiences/{id}/subscribers/{account_id}"
+                ))
+                .await?;
+            crate::output::print_output(&result, format);
+            crate::output::print_success("Subscriber removed");
         }
     }
     Ok(())

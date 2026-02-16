@@ -61,11 +61,12 @@ pub enum NodeCommand {
     },
     /// Create a content node
     #[command(long_about = "Create a content node with blocks.\n\n\
-        Blocks are the core content model. Each block has:\n\
-          key:   unique identifier within the node\n\
-          type:  one of the block types below\n\
-          value: the content (type-dependent)\n\
-          properties: optional metadata (label, variant, etc.)\n\n\
+        Required:\n\
+          KEY (positional)  Node key — letters, numbers, _ and - only, max 255 chars.\n\n\
+        Optional (--data JSON):\n\
+          blocks     Array of content blocks (see block types below)\n\
+          parentId   ID of parent node (for hierarchical content)\n\
+          status     \"draft\" (default) | \"active\" | \"archived\"\n\n\
         Block types:\n\
           text              - simple string: \"Hello world\"\n\
           localized_text    - per-locale: {\"en\": \"Hello\", \"bs\": \"Zdravo\"}\n\
@@ -77,6 +78,11 @@ pub enum NodeCommand {
           relationship_entry - reference to another entity: {\"id\": \"node_123\"}\n\
           relationship_media - media reference: {\"id\": \"media_123\", \"resolutions\": {...}}\n\
           geo_location       - coordinates: {\"coordinates\": {\"lat\": 43.85, \"lon\": 18.41}}\n\n\
+        Each block has:\n\
+          key:   unique identifier within the node (required)\n\
+          type:  one of the block types above (required)\n\
+          value: the content, type-dependent (required)\n\
+          properties: optional metadata (label, variant, etc.)\n\n\
         Data input:\n\
           --data '{...}'    Inline JSON\n\
           --data @file.json Read from file\n\
@@ -102,19 +108,12 @@ pub enum NodeCommand {
     },
     /// Update a content node
     #[command(long_about = "Update a content node.\n\n\
-        Pass blocks via --data. Blocks replace the entire blocks array.\n\
-        Include all blocks you want to keep, not just changed ones.\n\n\
-        Block types:\n\
-          text              - simple string: \"Hello world\"\n\
-          localized_text    - {\"en\": \"English\", \"bs\": \"Bosnian\"}\n\
-          markdown          - {\"en\": \"# Title\\nContent\"}\n\
-          number            - numeric value (also timestamps as epoch ms)\n\
-          boolean           - true/false\n\
-          list              - array of sub-block objects\n\
-          map               - key-value sub-blocks\n\
-          relationship_entry - {\"id\": \"node_123\"}\n\
-          relationship_media - {\"id\": \"media_123\", \"resolutions\": {...}}\n\
-          geo_location       - {\"coordinates\": {\"lat\": 43.85, \"lon\": 18.41}}\n\n\
+        Optional (--data JSON):\n\
+          blocks     Array of blocks — REPLACES entire array, include all you want to keep\n\
+          status     \"draft\" | \"active\" | \"archived\"\n\
+          parentId   ID of parent node\n\n\
+        Block types: text, localized_text, markdown, number, boolean,\n\
+        list, map, relationship_entry, relationship_media, geo_location.\n\n\
         Examples:\n\
         arky node update NODE_ID --data '{\"blocks\":[{\"key\":\"title\",\"type\":\"localized_text\",\"value\":{\"en\":\"Updated\"}}]}'\n\
         arky node update NODE_ID --data '{\"status\": \"active\"}'")]

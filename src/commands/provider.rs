@@ -40,10 +40,14 @@ pub enum ProviderCommand {
     },
     /// Create a provider (person/resource that delivers services)
     #[command(long_about = "Create a service provider.\n\n\
+        Required:\n\
+          KEY (positional)  Provider key — letters, numbers, _ and - only, max 255 chars.\n\n\
+        Optional (--data JSON):\n\
+          blocks           Profile info blocks (name, bio, avatar) — same types as nodes\n\
+          concurrentLimit  How many bookings at once (default: 1 = one at a time)\n\
+          status           \"draft\" (default) | \"active\" | \"archived\"\n\n\
         Providers are people or resources that deliver services (e.g., a barber,\n\
-        a meeting room, a vehicle). They have:\n\
-          - blocks: profile info (name, bio, avatar) — same block types as nodes\n\
-          - concurrentLimit: how many bookings at once (1 = one at a time)\n\n\
+        a meeting room, a vehicle).\n\n\
         After creating a provider, link them to services via `arky service create`\n\
         or `arky service update` by adding them to the providers array.\n\n\
         Example:\n\
@@ -63,6 +67,10 @@ pub enum ProviderCommand {
     },
     /// Update a provider
     #[command(long_about = "Update a provider by ID.\n\n\
+        Optional (--data JSON):\n\
+          blocks           Array of blocks — REPLACES entire array\n\
+          concurrentLimit  Max simultaneous bookings\n\
+          status           \"draft\" | \"active\" | \"archived\"\n\n\
         Example:\n\
         arky provider update PROV_ID --data '{\"blocks\": [...], \"concurrentLimit\": 2}'\n\
         arky provider update PROV_ID --data '{\"status\": \"active\"}'")]

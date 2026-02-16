@@ -37,10 +37,20 @@ pub enum PromoCodeCommand {
     },
     /// Create a promo code
     #[command(long_about = "Create a discount promo code.\n\n\
+        Required (--data JSON):\n\
+          code        Promo code string (e.g. \"SUMMER20\")\n\
+          discounts   At least one discount object (see types below)\n\n\
+        Optional:\n\
+          conditions  Array of restriction rules (see types below)\n\n\
         Discount types:\n\
           items_percentage      Percentage off items. bps = basis points (1000 = 10%, 2000 = 20%)\n\
           items_fixed           Fixed amount off items (in cents)\n\
           shipping_percentage   Percentage off shipping costs\n\n\
+        Discount object fields:\n\
+          type      One of the discount types above (required)\n\
+          marketId  Market this discount applies to (required)\n\
+          bps       Basis points for percentage types (required for percentage types)\n\
+          amount    Fixed amount in cents (required for items_fixed)\n\n\
         Condition types:\n\
           products          Array of product IDs this code applies to\n\
           services          Array of service IDs this code applies to\n\
@@ -89,7 +99,10 @@ pub async fn handle(cmd: PromoCodeCommand, client: &ArkyClient, format: &Format)
     match cmd {
         PromoCodeCommand::Get { id } => {
             let result = client
-                .get(&format!("/v1/payments/promo-codes/{id}"), &[])
+                .get(
+                    &format!("/v1/businesses/{biz_id}/promo-codes/{id}"),
+                    &[],
+                )
                 .await?;
             crate::output::print_output(&result, format);
         }
@@ -112,7 +125,10 @@ pub async fn handle(cmd: PromoCodeCommand, client: &ArkyClient, format: &Format)
             let params_ref: Vec<(&str, &str)> =
                 params.iter().map(|(k, v)| (*k, v.as_str())).collect();
             let result = client
-                .get("/v1/payments/promo-codes", &params_ref)
+                .get(
+                    &format!("/v1/businesses/{biz_id}/promo-codes"),
+                    &params_ref,
+                )
                 .await?;
             crate::output::print_output(&result, format);
         }
@@ -121,7 +137,10 @@ pub async fn handle(cmd: PromoCodeCommand, client: &ArkyClient, format: &Format)
             let overlay = parse_data(data.as_deref())?;
             merge_data(&mut body, overlay);
             let result = client
-                .post("/v1/payments/promo-codes", &body)
+                .post(
+                    &format!("/v1/businesses/{biz_id}/promo-codes"),
+                    &body,
+                )
                 .await?;
             crate::output::print_output(&result, format);
         }
@@ -130,13 +149,16 @@ pub async fn handle(cmd: PromoCodeCommand, client: &ArkyClient, format: &Format)
             let overlay = parse_data(data.as_deref())?;
             merge_data(&mut body, overlay);
             let result = client
-                .put(&format!("/v1/payments/promo-codes/{id}"), &body)
+                .put(
+                    &format!("/v1/businesses/{biz_id}/promo-codes/{id}"),
+                    &body,
+                )
                 .await?;
             crate::output::print_output(&result, format);
         }
         PromoCodeCommand::Delete { id } => {
             let result = client
-                .delete(&format!("/v1/payments/promo-codes/{id}"))
+                .delete(&format!("/v1/businesses/{biz_id}/promo-codes/{id}"))
                 .await?;
             crate::output::print_output(&result, format);
             crate::output::print_success("Promo code deleted");

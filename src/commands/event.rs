@@ -1,4 +1,5 @@
 use crate::client::ArkyClient;
+use crate::commands::parse_data;
 use crate::error::Result;
 use crate::output::Format;
 use clap::Subcommand;
@@ -23,6 +24,21 @@ pub enum EventCommand {
         #[arg(long)]
         cursor: Option<String>,
     },
+    /// Update an event
+    #[command(long_about = "Update an event by ID.\n\n\
+        Required (--data JSON):\n\
+          event   Event action object with \"action\" field\n\n\
+        Event action examples:\n\
+          {\"action\": \"order_status_changed\", \"data\": {\"from\": \"pending\", \"to\": \"paid\"}}\n\
+          {\"action\": \"booking_confirmed\"}\n\n\
+        Example:\n\
+        arky event update EVT_ID --data '{\"event\": {\"action\": \"order_updated\"}}'")]
+    Update {
+        /// Event ID
+        id: String,
+        #[arg(long, help = "JSON data: inline, @file, or - for stdin")]
+        data: Option<String>,
+    },
 }
 
 pub async fn handle(cmd: EventCommand, client: &ArkyClient, format: &Format) -> Result<()> {
@@ -45,6 +61,13 @@ pub async fn handle(cmd: EventCommand, client: &ArkyClient, format: &Format) -> 
                 params.iter().map(|(k, v)| (*k, v.as_str())).collect();
             let result = client
                 .get(&format!("/v1/businesses/{biz_id}/events"), &params_ref)
+                .await?;
+            crate::output::print_output(&result, format);
+        }
+        EventCommand::Update { id, data } => {
+            let body = parse_data(data.as_deref())?;
+            let result = client
+                .put(&format!("/v1/events/{id}"), &body)
                 .await?;
             crate::output::print_output(&result, format);
         }

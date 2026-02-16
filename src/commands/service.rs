@@ -38,10 +38,14 @@ pub enum ServiceCommand {
     },
     /// Create a service with blocks, providers, and working time
     #[command(long_about = "Create a bookable service.\n\n\
-        Services define what can be booked. They have:\n\
-          - blocks: content (title, description, images) — same as nodes\n\
-          - providers: who delivers the service, with prices, durations, and schedules\n\n\
-        Provider fields:\n\
+        Required:\n\
+          KEY (positional)   Service key — letters, numbers, _ and - only, max 255 chars.\n\
+          providers          At least one provider must be included in --data.\n\n\
+        Optional (--data JSON):\n\
+          blocks     Array of content blocks (same types as nodes)\n\
+          filters    Array of filter categories\n\
+          status     \"draft\" (default) | \"active\" | \"archived\"\n\n\
+        Provider fields (each object in providers array):\n\
           providerId: ID of an existing provider (create one first with `arky provider create`)\n\
           prices: [{\"currency\": \"USD\", \"market\": \"us\", \"amount\": 2500}] (amount in cents)\n\
           durations: [{\"duration\": 1800000}] (in milliseconds, 1800000 = 30 min)\n\
@@ -88,7 +92,11 @@ pub enum ServiceCommand {
     },
     /// Update a service
     #[command(long_about = "Update a service by ID.\n\n\
-        Blocks and providers replace entirely. Include all you want to keep.\n\n\
+        Optional (--data JSON):\n\
+          blocks     Array of blocks — REPLACES entire array, include all you want to keep\n\
+          providers  Array of providers — REPLACES entire array (at least 1 required)\n\
+          filters    Array of filters — REPLACES entire array\n\
+          status     \"draft\" | \"active\" | \"archived\"\n\n\
         Example:\n\
         arky service update SVC_ID --data '{\"blocks\": [...], \"providers\": [...]}'\n\
         arky service update SVC_ID --data '{\"status\": \"active\"}'")]
