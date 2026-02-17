@@ -8,7 +8,7 @@ use clap::{Parser, Subcommand};
 use commands::{
     account::AccountCommand, audience::AudienceCommand, auth::AuthCommand,
     booking::BookingCommand, business::BusinessCommand, config_cmd::ConfigCommand,
-    database::DatabaseCommand, media::MediaCommand,
+    media::MediaCommand,
     network::NetworkCommand, node::NodeCommand, notification::NotificationCommand,
     order::OrderCommand, platform::PlatformCommand, product::ProductCommand,
     promo_code::PromoCodeCommand, provider::ProviderCommand, service::ServiceCommand,
@@ -131,12 +131,7 @@ enum Command {
         #[command(subcommand)]
         cmd: BookingCommand,
     },
-    /// Key-value database operations
-    Db {
-        #[command(subcommand)]
-        cmd: DatabaseCommand,
-    },
-    /// Manage media files
+/// Manage media files
     Media {
         #[command(subcommand)]
         cmd: MediaCommand,
@@ -209,7 +204,6 @@ async fn main() {
         Command::Service { cmd } => commands::service::handle(cmd, &client, &format).await,
         Command::Provider { cmd } => commands::provider::handle(cmd, &client, &format).await,
         Command::Booking { cmd } => commands::booking::handle(cmd, &client, &format).await,
-        Command::Db { cmd } => commands::database::handle(cmd, &client, &format).await,
         Command::Media { cmd } => commands::media::handle(cmd, &client, &format).await,
         Command::Audience { cmd } => commands::audience::handle(cmd, &client, &format).await,
         Command::PromoCode { cmd } => commands::promo_code::handle(cmd, &client, &format).await,

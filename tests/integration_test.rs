@@ -681,29 +681,6 @@ fn test_audience_subscriber_flow() {
     arky().args(["audience", "delete", audience_id]).assert().success();
 }
 
-// ── Database (KV) ────────────────────────────────────────────
-
-#[test]
-#[ignore]
-fn test_db_put_scan_delete() {
-    let key = format!("cli-test/{}", ts_ms());
-    let value = serde_json::json!({"name": "test", "count": 42});
-
-    // Put
-    arky()
-        .args(["db", "put", &key, "--value", &value.to_string()])
-        .assert()
-        .success();
-
-    // Scan
-    let val = json_output(&mut arky().args(["db", "scan", "cli-test/", "--limit", "10"]));
-    let stdout = serde_json::to_string(&val).unwrap();
-    assert!(stdout.contains("cli-test/"), "Scan should include our key prefix");
-
-    // Delete
-    arky().args(["db", "delete", &key]).assert().success();
-}
-
 // ── Promo Code ───────────────────────────────────────────────
 
 #[test]

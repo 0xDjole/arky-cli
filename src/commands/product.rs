@@ -168,10 +168,9 @@ pub async fn handle(cmd: ProductCommand, client: &ArkyClient, format: &Format) -
             crate::output::print_output(&result, format);
         }
         ProductCommand::Delete { id } => {
-            let result = client
+            let _ = client
                 .delete(&format!("/v1/businesses/{biz_id}/products/{id}"))
                 .await?;
-            crate::output::print_output(&result, format);
             crate::output::print_success("Product deleted");
         }
     }

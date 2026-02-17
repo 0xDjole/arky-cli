@@ -172,10 +172,9 @@ pub async fn handle(cmd: AudienceCommand, client: &ArkyClient, format: &Format) 
             crate::output::print_output(&result, format);
         }
         AudienceCommand::Delete { id } => {
-            let result = client
+            let _ = client
                 .delete(&format!("/v1/businesses/{biz_id}/audiences/{id}"))
                 .await?;
-            crate::output::print_output(&result, format);
             crate::output::print_success("Audience deleted");
         }
         AudienceCommand::Subscribers { id, limit, cursor } => {
@@ -204,12 +203,11 @@ pub async fn handle(cmd: AudienceCommand, client: &ArkyClient, format: &Format) 
             crate::output::print_output(&result, format);
         }
         AudienceCommand::RemoveSubscriber { id, account_id } => {
-            let result = client
+            let _ = client
                 .delete(&format!(
                     "/v1/businesses/{biz_id}/audiences/{id}/subscribers/{account_id}"
                 ))
                 .await?;
-            crate::output::print_output(&result, format);
             crate::output::print_success("Subscriber removed");
         }
     }

@@ -241,10 +241,9 @@ pub async fn handle(cmd: NodeCommand, client: &ArkyClient, format: &Format) -> R
             crate::output::print_output(&result, format);
         }
         NodeCommand::Delete { id } => {
-            let result = client
+            let _ = client
                 .delete(&format!("/v1/businesses/{biz_id}/nodes/{id}"))
                 .await?;
-            crate::output::print_output(&result, format);
             crate::output::print_success("Node deleted");
         }
         NodeCommand::Children { id, limit, cursor } => {

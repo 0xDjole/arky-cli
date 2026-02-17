@@ -166,10 +166,9 @@ pub async fn handle(cmd: ProviderCommand, client: &ArkyClient, format: &Format) 
             crate::output::print_output(&result, format);
         }
         ProviderCommand::Delete { id } => {
-            let result = client
+            let _ = client
                 .delete(&format!("/v1/businesses/{biz_id}/providers/{id}"))
                 .await?;
-            crate::output::print_output(&result, format);
             crate::output::print_success("Provider deleted");
         }
         ProviderCommand::WorkingTime {

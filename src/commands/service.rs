@@ -176,10 +176,9 @@ pub async fn handle(cmd: ServiceCommand, client: &ArkyClient, format: &Format) -
             crate::output::print_output(&result, format);
         }
         ServiceCommand::Delete { id } => {
-            let result = client
+            let _ = client
                 .delete(&format!("/v1/businesses/{biz_id}/services/{id}"))
                 .await?;
-            crate::output::print_output(&result, format);
             crate::output::print_success("Service deleted");
         }
     }

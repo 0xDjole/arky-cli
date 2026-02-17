@@ -155,10 +155,9 @@ pub async fn handle(cmd: PromoCodeCommand, client: &ArkyClient, format: &Format)
             crate::output::print_output(&result, format);
         }
         PromoCodeCommand::Delete { id } => {
-            let result = client
+            let _ = client
                 .delete(&format!("/v1/businesses/{biz_id}/promo-codes/{id}"))
                 .await?;
-            crate::output::print_output(&result, format);
             crate::output::print_success("Promo code deleted");
         }
     }

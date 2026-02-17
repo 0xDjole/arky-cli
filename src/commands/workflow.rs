@@ -239,10 +239,9 @@ pub async fn handle(cmd: WorkflowCommand, client: &ArkyClient, format: &Format) 
             crate::output::print_output(&result, format);
         }
         WorkflowCommand::Delete { id } => {
-            let result = client
+            let _ = client
                 .delete(&format!("/v1/businesses/{biz_id}/workflows/{id}"))
                 .await?;
-            crate::output::print_output(&result, format);
             crate::output::print_success("Workflow deleted");
         }
         WorkflowCommand::Trigger { secret, data } => {

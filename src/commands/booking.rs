@@ -19,11 +19,11 @@ pub enum BookingCommand {
     },
     /// Search bookings
     #[command(long_about = "Search and filter bookings.\n\n\
-        Time range filters use epoch milliseconds.\n\
+        Time range filters use epoch seconds.\n\
         Statuses: pending, confirmed, cancelled, completed.\n\n\
         Examples:\n\
         arky booking list\n\
-        arky booking list --service-id SVC_ID --from 1704067200000 --to 1706745600000\n\
+        arky booking list --service-id SVC_ID --from 1771405200 --to 1771410600\n\
         arky booking list --provider-id PROV_ID --status confirmed\n\
         arky booking list --account-id ACC_ID")]
     List {
@@ -35,9 +35,9 @@ pub enum BookingCommand {
         provider_id: Option<String>,
         #[arg(long)]
         account_id: Option<String>,
-        #[arg(long, help = "Start timestamp (epoch ms)")]
+        #[arg(long, help = "Start timestamp (epoch seconds)")]
         from: Option<String>,
-        #[arg(long, help = "End timestamp (epoch ms)")]
+        #[arg(long, help = "End timestamp (epoch seconds)")]
         to: Option<String>,
         #[arg(long, help = "Filter: pending, confirmed, cancelled, completed")]
         status: Option<String>,
@@ -50,25 +50,30 @@ pub enum BookingCommand {
     #[command(long_about = "Create a booking directly (bypasses checkout flow).\n\n\
         For customer-facing booking with payment, use `arky booking checkout`.\n\n\
         Required (--data JSON):\n\
-          items    At least one booking item (see fields below).\n\n\
+          items    Array of booking items (at least one, see fields below)\n\n\
         Optional:\n\
           market           Market identifier (defaults to \"default\")\n\
           paymentMethodId  Payment method ID\n\
           promoCode        Promo code string\n\n\
-        Item fields:\n\
-          serviceId   Service ID (required)\n\
-          providerId  Provider ID (required)\n\
-          from        Start time as epoch milliseconds (required)\n\
-          to          End time as epoch milliseconds (required)\n\n\
-        Example:\n\
+        Item fields (ALL required):\n\
+          serviceId   Service ID\n\
+          providerId  Provider ID\n\
+          from        Start time as EPOCH SECONDS (NOT milliseconds!)\n\
+          to          End time as EPOCH SECONDS (NOT milliseconds!)\n\
+          blocks      Array of content blocks (use [] if none)\n\n\
+        IMPORTANT: from/to are epoch SECONDS. Duration (to - from) must be\n\
+        evenly divisible by the service's duration unit.\n\
+        Do NOT pass id or price on items — the server auto-generates those.\n\n\
+        Working example:\n\
         arky booking create --data '{\n\
           \"items\": [{\n\
             \"serviceId\": \"SVC_ID\",\n\
             \"providerId\": \"PROV_ID\",\n\
-            \"from\": 1704110400000,\n\
-            \"to\": 1704112200000\n\
+            \"from\": 1771405200,\n\
+            \"to\": 1771410600,\n\
+            \"blocks\": []\n\
           }],\n\
-          \"market\": \"default\"\n\
+          \"market\": \"us\"\n\
         }'")]
     Create {
         #[arg(long, help = "JSON data: inline, @file, or - for stdin")]
@@ -88,20 +93,25 @@ pub enum BookingCommand {
     },
     /// Get a booking price quote
     #[command(long_about = "Calculate prices for a booking without creating it.\n\n\
-        Use to preview pricing, availability, and totals.\n\n\
+        Use to preview pricing, availability, and totals before creating.\n\n\
         Required (--data JSON):\n\
-          items    At least one booking item (serviceId, providerId, from, to).\n\n\
+          items    Array of booking items (serviceId, providerId, from, to)\n\n\
         Optional:\n\
           market   Market identifier (defaults to \"default\")\n\n\
-        Example:\n\
+        Item fields (ALL required):\n\
+          serviceId   Service ID\n\
+          providerId  Provider ID\n\
+          from        Start time as EPOCH SECONDS (NOT milliseconds!)\n\
+          to          End time as EPOCH SECONDS (NOT milliseconds!)\n\n\
+        Working example:\n\
         arky booking quote --data '{\n\
           \"items\": [{\n\
             \"serviceId\": \"SVC_ID\",\n\
             \"providerId\": \"PROV_ID\",\n\
-            \"from\": 1704110400000,\n\
-            \"to\": 1704112200000\n\
+            \"from\": 1771405200,\n\
+            \"to\": 1771410600\n\
           }],\n\
-          \"market\": \"default\"\n\
+          \"market\": \"us\"\n\
         }'")]
     Quote {
         #[arg(long, help = "JSON data: inline, @file, or - for stdin")]
@@ -111,20 +121,26 @@ pub enum BookingCommand {
     #[command(long_about = "Create a booking with payment in one step.\n\n\
         This is the primary booking flow for customers.\n\n\
         Required (--data JSON):\n\
-          items    At least one booking item (serviceId, providerId, from, to).\n\n\
+          items    Array of booking items (see fields below)\n\n\
         Optional:\n\
           market           Market identifier (defaults to \"default\")\n\
           paymentMethodId  Payment method ID for charging\n\n\
-        Example:\n\
+        Item fields (ALL required):\n\
+          serviceId   Service ID\n\
+          providerId  Provider ID\n\
+          from        Start time as EPOCH SECONDS (NOT milliseconds!)\n\
+          to          End time as EPOCH SECONDS (NOT milliseconds!)\n\
+          blocks      Array of content blocks (use [] if none)\n\n\
+        Working example:\n\
         arky booking checkout --data '{\n\
           \"items\": [{\n\
             \"serviceId\": \"SVC_ID\",\n\
             \"providerId\": \"PROV_ID\",\n\
-            \"from\": 1704110400000,\n\
-            \"to\": 1704112200000\n\
+            \"from\": 1771405200,\n\
+            \"to\": 1771410600,\n\
+            \"blocks\": []\n\
           }],\n\
-          \"paymentMethodId\": \"pm_card_visa\",\n\
-          \"market\": \"default\"\n\
+          \"market\": \"us\"\n\
         }'")]
     Checkout {
         #[arg(long, help = "JSON data: inline, @file, or - for stdin")]

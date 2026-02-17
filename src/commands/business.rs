@@ -247,8 +247,7 @@ pub async fn handle(cmd: BusinessCommand, client: &ArkyClient, format: &Format) 
             crate::output::print_output(&result, format);
         }
         BusinessCommand::Delete { id } => {
-            let result = client.delete(&format!("/v1/businesses/{id}")).await?;
-            crate::output::print_output(&result, format);
+            let _ = client.delete(&format!("/v1/businesses/{id}")).await?;
             crate::output::print_success("Business deleted");
         }
         BusinessCommand::Parents => {
@@ -260,10 +259,9 @@ pub async fn handle(cmd: BusinessCommand, client: &ArkyClient, format: &Format) 
         }
         BusinessCommand::TriggerBuilds => {
             let biz_id = client.require_business_id()?;
-            let result = client
+            let _ = client
                 .post(&format!("/v1/businesses/{biz_id}/trigger-builds"), &json!({}))
                 .await?;
-            crate::output::print_output(&result, format);
             crate::output::print_success("Build triggered");
         }
         BusinessCommand::Plans => {
@@ -302,20 +300,18 @@ pub async fn handle(cmd: BusinessCommand, client: &ArkyClient, format: &Format) 
             if let Some(r) = role {
                 body["role"] = json!(r);
             }
-            let result = client
+            let _ = client
                 .post(&format!("/v1/businesses/{biz_id}/invitation"), &body)
                 .await?;
-            crate::output::print_output(&result, format);
             crate::output::print_success(&format!("Invitation sent to {email}"));
         }
         BusinessCommand::RemoveMember { account_id } => {
             let biz_id = client.require_business_id()?;
-            let result = client
+            let _ = client
                 .delete(&format!(
                     "/v1/businesses/{biz_id}/members/{account_id}"
                 ))
                 .await?;
-            crate::output::print_output(&result, format);
             crate::output::print_success("Member removed");
         }
         BusinessCommand::HandleInvitation { token, action } => {

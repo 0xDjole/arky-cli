@@ -96,22 +96,19 @@ pub async fn handle(cmd: AccountCommand, client: &ArkyClient, format: &Format) -
             crate::output::print_output(&result, format);
         }
         AccountCommand::Delete => {
-            let result = client.delete("/v1/accounts").await?;
-            crate::output::print_output(&result, format);
+            let _ = client.delete("/v1/accounts").await?;
             crate::output::print_success("Account deleted");
         }
         AccountCommand::AddPhone { phone } => {
             let body = json!({ "phoneNumber": phone });
-            let result = client.post("/v1/accounts/phone-number", &body).await?;
-            crate::output::print_output(&result, format);
+            let _ = client.post("/v1/accounts/phone-number", &body).await?;
             crate::output::print_success(&format!("Verification code sent to {phone}"));
         }
         AccountCommand::ConfirmPhone { phone, code } => {
             let body = json!({ "phoneNumber": phone, "code": code });
-            let result = client
+            let _ = client
                 .post("/v1/accounts/phone-number/confirm", &body)
                 .await?;
-            crate::output::print_output(&result, format);
             crate::output::print_success("Phone number confirmed");
         }
     }
