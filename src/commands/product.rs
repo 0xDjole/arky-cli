@@ -46,36 +46,39 @@ pub enum ProductCommand {
     },
     /// Create a product with blocks, variants, and filters
     #[command(long_about = "Create a product.\n\n\
-        Required:\n\
-          KEY (positional)  Product key — letters, numbers, _ and - only, max 255 chars.\n\n\
-        Optional (--data JSON):\n\
-          blocks     Array of content blocks (same types as nodes)\n\
-          variants   Array of purchasable variants (see below)\n\
-          filters    Array of filter categories (see below)\n\
-          status     \"draft\" (default) | \"active\" | \"archived\"\n\n\
-        Variant fields:\n\
-          key             Variant identifier, e.g. \"small\", \"default\" (required)\n\
-          prices          [{\"currency\": \"USD\", \"market\": \"us\", \"amount\": 2999}] (required)\n\
-                          amount is in cents (2999 = $29.99)\n\
-          inventoryLevel  Number (optional, null = unlimited stock)\n\n\
-        Filter fields:\n\
-          [{\"key\": \"color\", \"values\": [\"red\", \"blue\"]}]\n\n\
-        Block types: text, localized_text, markdown, number, boolean,\n\
-        list, map, relationship_entry, relationship_media, geo_location.\n\n\
-        Examples:\n\
-        arky product create t-shirt --data '{\n\
-          \"blocks\": [\n\
-            {\"key\": \"title\", \"type\": \"localized_text\", \"value\": {\"en\": \"Cool T-Shirt\"}},\n\
-            {\"key\": \"description\", \"type\": \"markdown\", \"value\": {\"en\": \"# Great shirt\\nSoft cotton.\"}},\n\
-            {\"key\": \"image\", \"type\": \"relationship_media\", \"value\": {\"id\": \"media_123\"}}\n\
-          ],\n\
-          \"variants\": [\n\
-            {\"key\": \"small\", \"prices\": [{\"currency\": \"USD\", \"market\": \"us\", \"amount\": 2999}], \"inventoryLevel\": 50},\n\
-            {\"key\": \"large\", \"prices\": [{\"currency\": \"USD\", \"market\": \"us\", \"amount\": 3499}], \"inventoryLevel\": 30}\n\
-          ],\n\
-          \"filters\": [{\"key\": \"size\", \"values\": [\"small\", \"large\"]}]\n\
-        }'\n\n\
-        arky product create my-product --data @product.json")]
+    Required:\n\
+      KEY (positional)  Product key — letters, numbers, _ and - only, max 255 chars.\n\n\
+    Required (--data JSON):\n\
+      slug          Localized slug: {\"en\": \"t-shirt\"}\n\
+      status        \"draft\" | \"active\" | \"archived\"\n\
+      audienceIds   Array of audience IDs (use [] if none)\n\
+      networkIds    Array of network IDs (use [] if none)\n\
+      filters       Array of filter objects (use [] if none)\n\
+      blocks        Array of content blocks (same as nodes — each needs type, id, key, properties, value)\n\
+      variants      Array of purchasable variants (see below)\n\n\
+    Variant fields (ALL required):\n\
+      key          Variant identifier, e.g. \"default\", \"small\" (required)\n\
+      prices       [{\"currency\": \"usd\", \"market\": \"us\", \"amount\": 1999}] — amount in cents (required)\n\
+      inventory    [{\"locationId\": \"default\", \"available\": 100, \"reserved\": 0}] (required)\n\
+      attributes   Array of attribute objects (use [] if none) (required)\n\n\
+    Working example (from integration tests):\n\
+    arky product create t-shirt --data '{\n\
+      \"slug\": {\"en\": \"t-shirt\"},\n\
+      \"status\": \"active\",\n\
+      \"audienceIds\": [],\n\
+      \"networkIds\": [],\n\
+      \"filters\": [],\n\
+      \"blocks\": [\n\
+        {\"type\": \"localized_text\", \"id\": \"b1\", \"key\": \"title\", \"properties\": {}, \"value\": {\"en\": \"Test Product\"}},\n\
+        {\"type\": \"markdown\", \"id\": \"b2\", \"key\": \"description\", \"properties\": {}, \"value\": {\"en\": \"# Test\\nA test product\"}}\n\
+      ],\n\
+      \"variants\": [{\n\
+        \"key\": \"default\",\n\
+        \"prices\": [{\"currency\": \"usd\", \"market\": \"us\", \"amount\": 1999}],\n\
+        \"inventory\": [{\"locationId\": \"default\", \"available\": 100, \"reserved\": 0}],\n\
+        \"attributes\": []\n\
+      }]\n\
+    }'")]
     Create {
         /// Product key (unique within business, URL-safe)
         key: String,

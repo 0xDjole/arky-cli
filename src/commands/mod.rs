@@ -5,7 +5,6 @@ pub mod booking;
 pub mod business;
 pub mod config_cmd;
 pub mod database;
-pub mod event;
 pub mod media;
 pub mod network;
 pub mod node;

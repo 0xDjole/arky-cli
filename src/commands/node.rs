@@ -61,43 +61,49 @@ pub enum NodeCommand {
     },
     /// Create a content node
     #[command(long_about = "Create a content node with blocks.\n\n\
-        Required:\n\
-          KEY (positional)  Node key — letters, numbers, _ and - only, max 255 chars.\n\n\
-        Optional (--data JSON):\n\
-          blocks     Array of content blocks (see block types below)\n\
-          parentId   ID of parent node (for hierarchical content)\n\
-          status     \"draft\" (default) | \"active\" | \"archived\"\n\n\
-        Block types:\n\
-          text              - simple string: \"Hello world\"\n\
-          localized_text    - per-locale: {\"en\": \"Hello\", \"bs\": \"Zdravo\"}\n\
-          markdown          - localized markdown: {\"en\": \"# Title\\nBody\"}\n\
-          number            - numeric: 42 (also timestamps as epoch ms for dates)\n\
-          boolean           - true or false\n\
-          list              - array of sub-block objects: [{\"key\":\"item\",\"type\":\"text\",\"value\":\"A\"}]\n\
-          map               - key-value sub-blocks\n\
-          relationship_entry - reference to another entity: {\"id\": \"node_123\"}\n\
-          relationship_media - media reference: {\"id\": \"media_123\", \"resolutions\": {...}}\n\
-          geo_location       - coordinates: {\"coordinates\": {\"lat\": 43.85, \"lon\": 18.41}}\n\n\
-        Each block has:\n\
-          key:   unique identifier within the node (required)\n\
-          type:  one of the block types above (required)\n\
-          value: the content, type-dependent (required)\n\
-          properties: optional metadata (label, variant, etc.)\n\n\
-        Data input:\n\
-          --data '{...}'    Inline JSON\n\
-          --data @file.json Read from file\n\
-          --data -          Read from stdin\n\n\
-        Examples:\n\
-        arky node create blog-post --data '{\n\
-          \"blocks\": [\n\
-            {\"key\": \"title\", \"type\": \"localized_text\", \"value\": {\"en\": \"My Post\"}},\n\
-            {\"key\": \"body\", \"type\": \"markdown\", \"value\": {\"en\": \"# Hello\\nWorld\"}},\n\
-            {\"key\": \"image\", \"type\": \"relationship_media\", \"value\": {\"id\": \"media_abc\"}},\n\
-            {\"key\": \"published\", \"type\": \"boolean\", \"value\": true}\n\
-          ]\n\
-        }'\n\n\
-        arky node create my-page --data @content.json\n\
-        echo '{\"blocks\":[...]}' | arky node create my-page --data -")]
+    Required:\n\
+      KEY (positional)  Node key — letters, numbers, _ and - only, max 255 chars.\n\n\
+    Required (--data JSON):\n\
+      slug          Localized slug object: {\"en\": \"my-page\"}\n\
+      writeAccess   \"public\" or \"private\"\n\
+      audienceIds   Array of audience IDs (use [] if none)\n\
+      blocks        Array of content blocks (see block types below)\n\n\
+    Optional:\n\
+      parentId   ID of parent node (for hierarchical content)\n\
+      status     \"draft\" (default) | \"active\" | \"archived\"\n\n\
+    Block fields (ALL required on each block):\n\
+      type        Block type (see types below)\n\
+      id          Unique ID string (UUID recommended)\n\
+      key         Unique key within the node\n\
+      properties  Metadata object (usually {})\n\
+      value       Content, depends on type\n\n\
+    Block types:\n\
+      localized_text    {\"en\": \"Hello\", \"bs\": \"Zdravo\"}\n\
+      markdown          {\"en\": \"# Title\\nBody\"}\n\
+      number            42 (also timestamps as epoch ms for dates)\n\
+      boolean           true or false\n\
+      text              \"Hello world\"\n\
+      list              [{sub-block}, ...]\n\
+      map               {key: sub-block}\n\
+      relationship_entry  {\"id\": \"node_123\"}\n\
+      relationship_media  {\"id\": \"media_123\"}\n\
+      geo_location        {\"coordinates\": {\"lat\": 43.85, \"lon\": 18.41}}\n\n\
+    Data input:\n\
+      --data '{...}'    Inline JSON\n\
+      --data @content.json  Read from file\n\
+      --data -          Read from stdin\n\n\
+    Working example (from integration tests):\n\
+    arky node create my-page --data '{\n\
+      \"slug\": {\"en\": \"my-page\"},\n\
+      \"writeAccess\": \"private\",\n\
+      \"audienceIds\": [],\n\
+      \"blocks\": [\n\
+        {\"type\": \"localized_text\", \"id\": \"b1\", \"key\": \"title\", \"properties\": {}, \"value\": {\"en\": \"My Page\"}},\n\
+        {\"type\": \"markdown\", \"id\": \"b2\", \"key\": \"body\", \"properties\": {}, \"value\": {\"en\": \"# Hello\"}},\n\
+        {\"type\": \"number\", \"id\": \"b3\", \"key\": \"count\", \"properties\": {}, \"value\": 42},\n\
+        {\"type\": \"boolean\", \"id\": \"b4\", \"key\": \"visible\", \"properties\": {}, \"value\": true}\n\
+      ]\n\
+    }'")]
     Create {
         /// Node key (unique within business, URL-safe)
         key: String,
@@ -108,15 +114,28 @@ pub enum NodeCommand {
     },
     /// Update a content node
     #[command(long_about = "Update a content node.\n\n\
-        Optional (--data JSON):\n\
-          blocks     Array of blocks — REPLACES entire array, include all you want to keep\n\
-          status     \"draft\" | \"active\" | \"archived\"\n\
-          parentId   ID of parent node\n\n\
-        Block types: text, localized_text, markdown, number, boolean,\n\
-        list, map, relationship_entry, relationship_media, geo_location.\n\n\
-        Examples:\n\
-        arky node update NODE_ID --data '{\"blocks\":[{\"key\":\"title\",\"type\":\"localized_text\",\"value\":{\"en\":\"Updated\"}}]}'\n\
-        arky node update NODE_ID --data '{\"status\": \"active\"}'")]
+    Required (--data JSON):\n\
+      key           Node key (must match existing)\n\
+      slug          Localized slug object: {\"en\": \"my-page\"}\n\
+      status        \"draft\" | \"active\" | \"archived\"\n\
+      writeAccess   \"public\" or \"private\"\n\
+      audienceIds   Array of audience IDs (use [] if none)\n\
+      blocks        Array of blocks — REPLACES entire array, include all you want to keep\n\n\
+    Each block needs: type, id, key, properties, value (same as create).\n\
+    Block types: localized_text, markdown, number, boolean, text, list, map,\n\
+    relationship_entry, relationship_media, geo_location\n\n\
+    Working example (from integration tests):\n\
+    arky node update NODE_ID --data '{\n\
+      \"key\": \"my-page\",\n\
+      \"slug\": {\"en\": \"my-page\"},\n\
+      \"status\": \"active\",\n\
+      \"writeAccess\": \"private\",\n\
+      \"audienceIds\": [],\n\
+      \"blocks\": [\n\
+        {\"type\": \"localized_text\", \"id\": \"b1\", \"key\": \"title\", \"properties\": {}, \"value\": {\"en\": \"Updated Title\"}},\n\
+        {\"type\": \"markdown\", \"id\": \"b2\", \"key\": \"body\", \"properties\": {}, \"value\": {\"en\": \"# Updated\"}}\n\
+      ]\n\
+    }'")]
     Update {
         /// Node ID
         id: String,

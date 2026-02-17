@@ -58,19 +58,17 @@ pub enum PromoCodeCommand {
           date_range        {\"start\": timestamp, \"end\": timestamp}\n\
           max_uses          Maximum total uses across all customers\n\
           max_uses_per_user Maximum uses per individual customer\n\n\
-        Examples:\n\
+        Condition value format (adjacently tagged):\n\
+          max_uses:          {\"type\": \"count\", \"value\": 50}\n\
+          max_uses_per_user: {\"type\": \"count\", \"value\": 5}\n\
+          min_order_amount:  {\"type\": \"amount\", \"value\": 5000}\n\
+          products:          {\"type\": \"ids\", \"value\": [\"prod_1\", \"prod_2\"]}\n\
+          date_range:        {\"type\": \"range\", \"value\": {\"start\": 1704067200000, \"end\": 1706745600000}}\n\n\
+        Working example (from integration tests):\n\
         arky promo-code create --data '{\n\
           \"code\": \"SUMMER20\",\n\
-          \"discounts\": [{\"type\": \"items_percentage\", \"marketId\": \"us\", \"bps\": 2000}],\n\
-          \"conditions\": [{\"type\": \"max_uses\", \"value\": 100}]\n\
-        }'\n\n\
-        arky promo-code create --data '{\n\
-          \"code\": \"FREESHIP\",\n\
-          \"discounts\": [{\"type\": \"shipping_percentage\", \"marketId\": \"us\", \"bps\": 10000}],\n\
-          \"conditions\": [\n\
-            {\"type\": \"min_order_amount\", \"value\": 5000},\n\
-            {\"type\": \"date_range\", \"value\": {\"start\": 1704067200000, \"end\": 1706745600000}}\n\
-          ]\n\
+          \"discounts\": [{\"type\": \"items_percentage\", \"marketId\": \"us\", \"bps\": 1500}],\n\
+          \"conditions\": [{\"type\": \"max_uses\", \"value\": {\"type\": \"count\", \"value\": 50}}]\n\
         }'")]
     Create {
         #[arg(long, help = "JSON data: inline, @file, or - for stdin")]

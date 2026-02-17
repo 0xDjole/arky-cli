@@ -33,10 +33,39 @@ pub enum BusinessCommand {
     },
     /// Create a new business
     #[command(long_about = "Create a new business.\n\n\
-        The key must be unique and URL-safe (lowercase, hyphens).\n\n\
-        Example:\n\
-        arky business create my-shop --data '{\"name\": \"My Shop\"}'\n\n\
-        Response: the created business object with generated ID.")]
+        Required:\n\
+          KEY (positional)  Business key — unique, URL-safe (lowercase, hyphens)\n\n\
+        Required (--data JSON):\n\
+          status     \"active\" | \"draft\" | \"archived\"\n\
+          timezone   IANA timezone string (e.g. \"UTC\", \"America/New_York\")\n\
+          configs    Business configuration object (see below)\n\n\
+        Configs object:\n\
+          currencies        [{\"code\": \"usd\", \"symbol\": \"$\"}]\n\
+          markets           [{\"id\": \"us\", \"name\": \"United States\", \"currencies\": [\"usd\"], ...}]\n\
+          locations         [] (warehouse/pickup locations)\n\
+          paymentProviders  [] (Stripe, etc.)\n\
+          shippingProviders [] (shipping integrations)\n\
+          emails            {\"billing\": \"you@example.com\", \"support\": \"you@example.com\"}\n\n\
+        Working example (from integration tests):\n\
+        arky business create my-shop --data '{\n\
+          \"status\": \"active\",\n\
+          \"timezone\": \"UTC\",\n\
+          \"configs\": {\n\
+            \"currencies\": [{\"code\": \"usd\", \"symbol\": \"$\", \"decimals\": 2}],\n\
+            \"markets\": [{\n\
+              \"id\": \"us\",\n\
+              \"name\": \"United States\",\n\
+              \"currencies\": [\"usd\"],\n\
+              \"countries\": [\"US\"],\n\
+              \"languages\": [\"en\"],\n\
+              \"defaultLanguage\": \"en\"\n\
+            }],\n\
+            \"locations\": [],\n\
+            \"paymentProviders\": [],\n\
+            \"shippingProviders\": [],\n\
+            \"emails\": {\"billing\": \"test@example.com\", \"support\": \"test@example.com\"}\n\
+          }\n\
+        }'")]
     Create {
         /// Business key (unique identifier)
         key: String,

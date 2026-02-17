@@ -8,24 +8,29 @@ use clap::{Parser, Subcommand};
 use commands::{
     account::AccountCommand, audience::AudienceCommand, auth::AuthCommand,
     booking::BookingCommand, business::BusinessCommand, config_cmd::ConfigCommand,
-    database::DatabaseCommand, event::EventCommand, media::MediaCommand,
+    database::DatabaseCommand, media::MediaCommand,
     network::NetworkCommand, node::NodeCommand, notification::NotificationCommand,
     order::OrderCommand, platform::PlatformCommand, product::ProductCommand,
     promo_code::PromoCodeCommand, provider::ProviderCommand, service::ServiceCommand,
     shipping::ShippingCommand, workflow::WorkflowCommand,
 };
 
-/// Arky CLI — control the Arky platform from your terminal.
+/// Arky CLI — agentic-first CLI for the Arky platform.
 ///
-/// Designed for AI agents and humans. Outputs JSON by default.
-/// Every subcommand has detailed --help with JSON examples and field docs.
+/// IMPORTANT: Always run `arky <command> <action> --help` before using any command.
+/// Each action's --help documents ALL required/optional fields with working JSON examples
+/// that are tested against the live API. Read --help first, get it right first try.
+///
+/// Quick reference:
+///   arky node create --help          # see exact JSON shape for creating nodes
+///   arky product create --help       # see required fields for products
+///   arky notification trigger --help  # see how to send emails
 ///
 /// Setup:
 ///   arky config set base_url http://localhost:8000
 ///   arky config set business_id YOUR_BUSINESS_ID
 ///   arky auth login your@email.com          # sends verification code
 ///   arky auth verify your@email.com CODE    # saves token automatically
-///   arky node list --limit 5                # start using the API
 ///
 /// Or via environment variables:
 ///   export ARKY_BASE_URL=http://localhost:8000
@@ -47,36 +52,10 @@ use commands::{
 ///   table  - Human-readable table
 ///   plain  - Key=value pairs for piping
 ///
-/// Block system:
-///   All content entities (nodes, products, services, providers) use blocks.
-///   A block is: {"key": "title", "type": "localized_text", "value": {"en": "Hello"}}
-///
-///   Block types:
-///     text               "Hello world"
-///     localized_text     {"en": "English", "bs": "Bosnian"}
-///     markdown           {"en": "# Title\nContent"}
-///     number             42 (also epoch ms for dates)
-///     boolean            true | false
-///     list               [{sub-block}, {sub-block}]
-///     map                {key: sub-block} pairs
-///     relationship_entry {"id": "node_123"}
-///     relationship_media {"id": "media_123"}
-///     geo_location       {"coordinates": {"lat": 43.85, "lon": 18.41}}
-///
-/// Common workflows:
-///   # Upload image, then use in a node
-///   arky media upload photo.jpg
-///   arky node create my-page --data '{"blocks":[
-///     {"key":"title","type":"localized_text","value":{"en":"My Page"}},
-///     {"key":"image","type":"relationship_media","value":{"id":"MEDIA_ID_FROM_UPLOAD"}}
-///   ]}'
-///
-///   # Create provider + service for bookings
-///   arky provider create john --data '{"blocks":[{"key":"name","type":"text","value":"John"}]}'
-///   arky service create haircut --data '{"blocks":[...], "providers":[{"providerId":"PROV_ID", ...}]}'
-///
-///   # Create product with variants for e-shop
-///   arky product create t-shirt --data '{"blocks":[...], "variants":[{"key":"sm","prices":[...]}]}'
+/// Block system (used by nodes, products, services, providers):
+///   Every block needs: type, id, key, properties (usually {}), value
+///   Types: localized_text, markdown, number, boolean, text, list, map,
+///          relationship_entry, relationship_media, geo_location
 #[derive(Parser, Debug)]
 #[command(name = "arky", version, about, long_about)]
 struct Cli {
@@ -178,11 +157,6 @@ enum Command {
         #[command(subcommand)]
         cmd: ShippingCommand,
     },
-    /// View and manage events
-    Event {
-        #[command(subcommand)]
-        cmd: EventCommand,
-    },
     /// Manage your account
     Account {
         #[command(subcommand)]
@@ -240,7 +214,6 @@ async fn main() {
         Command::Audience { cmd } => commands::audience::handle(cmd, &client, &format).await,
         Command::PromoCode { cmd } => commands::promo_code::handle(cmd, &client, &format).await,
         Command::Shipping { cmd } => commands::shipping::handle(cmd, &client, &format).await,
-        Command::Event { cmd } => commands::event::handle(cmd, &client, &format).await,
         Command::Account { cmd } => commands::account::handle(cmd, &client, &format).await,
         Command::Platform { cmd } => commands::platform::handle(cmd, &client, &format).await,
         Command::Network { cmd } => commands::network::handle(cmd, &client, &format).await,

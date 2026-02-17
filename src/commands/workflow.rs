@@ -106,6 +106,18 @@ pub enum WorkflowCommand {
               \"edges\": [{\"node\": \"check\", \"output\": \"default\"}]\n\
             }\n\
           }\n\
+        }'\n\n\
+        Minimal working example (from integration tests):\n\
+        arky workflow create my-workflow --data '{\n\
+          \"status\": \"draft\",\n\
+          \"nodes\": {\n\
+            \"trigger\": {\"type\": \"trigger\"},\n\
+            \"process\": {\n\
+              \"type\": \"transform\",\n\
+              \"code\": \"trigger\",\n\
+              \"edges\": [{\"node\": \"trigger\", \"output\": \"default\"}]\n\
+            }\n\
+          }\n\
         }'")]
     Create {
         /// Workflow key (unique within business)

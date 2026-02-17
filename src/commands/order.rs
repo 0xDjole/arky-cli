@@ -52,13 +52,13 @@ pub enum OrderCommand {
           billingAddress   Same shape, or {\"sameAsShipping\": true}\n\n\
         Item fields:\n\
           productId   Product ID (required)\n\
-          variantKey  Variant key, e.g. \"default\", \"small\" (required)\n\
+          variantId  Variant ID from the created product's variants array (required)\n\
           quantity    Number of units (required)\n\n\
-        Example:\n\
+        Working example (from integration tests):\n\
         arky order create --data '{\n\
-          \"items\": [{\"productId\": \"prod_123\", \"variantKey\": \"default\", \"quantity\": 1}],\n\
           \"market\": \"us\",\n\
-          \"status\": \"paid\"\n\
+          \"items\": [{\"productId\": \"PRODUCT_ID\", \"variantId\": \"VARIANT_ID\", \"quantity\": 1}],\n\
+          \"blocks\": []\n\
         }'")]
     Create {
         #[arg(long, help = "JSON data: inline, @file, or - for stdin")]
@@ -80,17 +80,17 @@ pub enum OrderCommand {
     #[command(long_about = "Calculate prices for a set of items without creating an order.\n\n\
         Use this to preview totals, taxes, and discounts before checkout.\n\n\
         Required (--data JSON):\n\
-          items    At least one item (productId, variantKey, quantity).\n\
+          items    At least one item (productId, variantId, quantity).\n\
           market   Market identifier (e.g. \"us\")\n\n\
         Optional:\n\
           promoCode         Promo code string\n\
           shippingAddress   For shipping cost calculation\n\
           shippingMethodId  Shipping method ID\n\n\
-        Example:\n\
+        Working example (from integration tests):\n\
         arky order quote --data '{\n\
-          \"items\": [{\"productId\": \"prod_123\", \"variantKey\": \"default\", \"quantity\": 2}],\n\
-          \"promoCode\": \"SAVE10\",\n\
-          \"market\": \"us\"\n\
+          \"market\": \"us\",\n\
+          \"items\": [{\"productId\": \"PRODUCT_ID\", \"variantId\": \"VARIANT_ID\", \"quantity\": 2}],\n\
+          \"blocks\": []\n\
         }'\n\n\
         Response shape:\n\
         {\"subtotal\": 5998, \"discount\": 600, \"tax\": 0, \"total\": 5398,\n\

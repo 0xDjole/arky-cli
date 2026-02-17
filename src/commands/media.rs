@@ -53,14 +53,24 @@ pub enum MediaCommand {
         #[arg(long)]
         sort_direction: Option<String>,
     },
-    /// Update media metadata (title, alt text, description)
+    /// Get a media file by ID
+    #[command(long_about = "Fetch a single media file by ID.\n\n\
+        Example:\n\
+        arky media get MEDIA_ID\n\n\
+        Response shape:\n\
+        {\"id\": \"...\", \"mimeType\": \"image/png\", \"slug\": {\"en\": \"photo\"},\n\
+         \"resolutions\": {\"original\": {\"url\": \"https://...\"}},\n\
+         \"businessId\": \"...\", \"uploadedAt\": \"...\"}")]
+    Get {
+        /// Media ID
+        id: String,
+    },
+    /// Update media metadata
     #[command(long_about = "Update metadata for an uploaded media file.\n\n\
         Optional (--data JSON):\n\
-          title        Display title\n\
-          alt          Alt text for accessibility\n\
-          description  Long description\n\n\
+          slug   Localized slug: {\"en\": \"my-photo\"}\n\n\
         Example:\n\
-        arky media update MEDIA_ID --data '{\"title\": \"Company Logo\", \"alt\": \"Logo of our company\"}'")]
+        arky media update MEDIA_ID --data '{\"slug\": {\"en\": \"company-logo\"}}'")]
     Update {
         /// Media ID
         id: String,
@@ -132,6 +142,12 @@ pub async fn handle(cmd: MediaCommand, client: &ArkyClient, format: &Format) -> 
                 params.iter().map(|(k, v)| (*k, v.as_str())).collect();
             let result = client
                 .get(&format!("/v1/businesses/{biz_id}/media"), &params_ref)
+                .await?;
+            crate::output::print_output(&result, format);
+        }
+        MediaCommand::Get { id } => {
+            let result = client
+                .get(&format!("/v1/businesses/{biz_id}/media/{id}"), &[])
                 .await?;
             crate::output::print_output(&result, format);
         }

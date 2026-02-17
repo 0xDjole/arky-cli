@@ -37,16 +37,19 @@ pub enum AudienceCommand {
           KEY (positional)  Audience key — letters, numbers, _ and - only, max 255 chars.\n\n\
         Optional (--data JSON):\n\
           blocks   Array of content blocks (same types as nodes)\n\
-          prices   Array of subscription prices for paid tiers\n\n\
+          prices   Array of subscription prices for paid tiers (use [] for free)\n\n\
         Audiences can be used as:\n\
           - Access groups: gate content behind membership\n\
           - Subscription tiers: charge recurring fees for access\n\
           - Mailing lists: manage subscribers for newsletters\n\n\
-        Example:\n\
+        Working example (from integration tests):\n\
+        arky audience create premium-members --data '{\"prices\": []}'\n\n\
+        With blocks:\n\
         arky audience create premium-members --data '{\n\
+          \"prices\": [],\n\
           \"blocks\": [\n\
-            {\"key\": \"title\", \"type\": \"localized_text\", \"value\": {\"en\": \"Premium Members\"}},\n\
-            {\"key\": \"description\", \"type\": \"markdown\", \"value\": {\"en\": \"Exclusive access\"}}\n\
+            {\"key\": \"title\", \"type\": \"localized_text\", \"id\": \"b1\", \"properties\": {}, \"value\": {\"en\": \"Premium Members\"}},\n\
+            {\"key\": \"description\", \"type\": \"markdown\", \"id\": \"b2\", \"properties\": {}, \"value\": {\"en\": \"Exclusive access\"}}\n\
           ]\n\
         }'")]
     Create {
@@ -56,6 +59,14 @@ pub enum AudienceCommand {
         data: Option<String>,
     },
     /// Update an audience
+    #[command(long_about = "Update an audience by ID.\n\n\
+        Optional (--data JSON):\n\
+          key      Audience key\n\
+          prices   Array of subscription prices\n\
+          status   \"draft\" | \"active\" | \"archived\"\n\
+          blocks   Array of content blocks\n\n\
+        Example:\n\
+        arky audience update AUD_ID --data '{\"prices\": [], \"status\": \"active\"}'")]
     Update {
         /// Audience ID
         id: String,

@@ -40,25 +40,33 @@ pub enum ProviderCommand {
     },
     /// Create a provider (person/resource that delivers services)
     #[command(long_about = "Create a service provider.\n\n\
-        Required:\n\
-          KEY (positional)  Provider key — letters, numbers, _ and - only, max 255 chars.\n\n\
-        Optional (--data JSON):\n\
-          blocks           Profile info blocks (name, bio, avatar) — same types as nodes\n\
-          concurrentLimit  How many bookings at once (default: 1 = one at a time)\n\
-          status           \"draft\" (default) | \"active\" | \"archived\"\n\n\
-        Providers are people or resources that deliver services (e.g., a barber,\n\
-        a meeting room, a vehicle).\n\n\
-        After creating a provider, link them to services via `arky service create`\n\
-        or `arky service update` by adding them to the providers array.\n\n\
-        Example:\n\
-        arky provider create john-doe --data '{\n\
-          \"blocks\": [\n\
-            {\"key\": \"name\", \"type\": \"localized_text\", \"value\": {\"en\": \"John Doe\"}},\n\
-            {\"key\": \"bio\", \"type\": \"markdown\", \"value\": {\"en\": \"Expert barber with 10 years experience\"}},\n\
-            {\"key\": \"avatar\", \"type\": \"relationship_media\", \"value\": {\"id\": \"media_456\"}}\n\
-          ],\n\
-          \"concurrentLimit\": 1\n\
-        }'")]
+    Required:\n\
+      KEY (positional)  Provider key — letters, numbers, _ and - only, max 255 chars.\n\n\
+    Required (--data JSON):\n\
+      slug            Localized slug: {\"en\": \"john\"}\n\
+      status          \"draft\" | \"active\" | \"archived\"\n\
+      networkIds      Array of network IDs (use [] if none)\n\
+      audienceIds     Array of audience IDs (use [] if none)\n\
+      filters         Array of filter objects (use [] if none)\n\
+      blocks          Array of content blocks (each needs type, id, key, properties, value)\n\
+      concurrentLimit How many bookings at once (default: 1 = one at a time)\n\n\
+    Providers are people or resources that deliver services (e.g., a barber,\n\
+    a meeting room, a vehicle).\n\n\
+    After creating a provider, link them to services via `arky service create`\n\
+    or `arky service update` by adding them to the providers array.\n\n\
+    Working example (from integration tests):\n\
+    arky provider create john --data '{\n\
+      \"slug\": {\"en\": \"john\"},\n\
+      \"status\": \"active\",\n\
+      \"networkIds\": [],\n\
+      \"audienceIds\": [],\n\
+      \"filters\": [],\n\
+      \"blocks\": [\n\
+        {\"type\": \"localized_text\", \"id\": \"b1\", \"key\": \"name\", \"properties\": {}, \"value\": {\"en\": \"Test Provider\"}},\n\
+        {\"type\": \"markdown\", \"id\": \"b2\", \"key\": \"bio\", \"properties\": {}, \"value\": {\"en\": \"Integration test provider\"}}\n\
+      ],\n\
+      \"concurrentLimit\": 1\n\
+    }'")]
     Create {
         /// Provider key (unique within business, URL-safe)
         key: String,
