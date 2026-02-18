@@ -52,6 +52,19 @@ use commands::{
 ///   table  - Human-readable table
 ///   plain  - Key=value pairs for piping
 ///
+/// API conventions:
+///   - All updates are full PUT (replace entire object, no merge/patch).
+///     Always GET the current object first, modify it, then PUT the full thing back.
+///   - All monetary values are i64 in minor units (e.g. 5000 = $50.00 USD).
+///     Minor units = smallest currency unit (cents for USD, pence for GBP, yen for JPY).
+///   - Timestamps are Unix epoch seconds (i64). Server sets createdAt/updatedAt.
+///   - IDs are UUIDs. Keys are human-readable slugs (letters, numbers, _ and -).
+///   - Keys must be unique per business (duplicate key = error).
+///   - HTTP workflow nodes require ALL fields: method, url, headers (object),
+///     timeoutMs (integer), delayMs (integer), retries (integer), retryDelayMs (integer).
+///   - Shipping provider IDs come from business configs.shippingIds
+///     (find via: arky business get YOUR_BIZ_ID).
+///
 /// Block system (used by nodes, products, services, providers):
 ///   Every block needs: type, id, key, properties (usually {}), value
 ///   Types: localized_text, markdown, number, boolean, text, list, map,
