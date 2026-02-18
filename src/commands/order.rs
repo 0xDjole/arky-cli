@@ -49,10 +49,10 @@ pub enum OrderCommand {
         Optional:\n\
           status           \"pending\" (default) | \"paid\" | \"shipped\" | \"delivered\" | \"cancelled\" | \"refunded\"\n\
           shippingAddress  {\"name\": \"...\", \"street1\": \"...\", \"city\": \"...\", \"country\": \"...\"}\n\
-          billingAddress   Same shape, or {\"sameAsShipping\": true}\n\n\
+          billingAddress   Same shape as shippingAddress\n\n\
         Item fields:\n\
           productId   Product ID (required)\n\
-          variantId  Variant ID from the created product's variants array (required)\n\
+          variantId   Variant ID from the created product's variants array (required)\n\
           quantity    Number of units (required)\n\n\
         Working example (from integration tests):\n\
         arky order create --data '{\n\
@@ -103,29 +103,30 @@ pub enum OrderCommand {
     #[command(long_about = "Create an order and process payment in one step.\n\n\
         This is the primary purchase flow.\n\n\
         Required (--data JSON):\n\
-          items    At least one item (productId, variantKey, quantity).\n\n\
+          items    At least one item (productId, variantId, quantity).\n\n\
         Optional:\n\
           market            Market identifier (auto-set from business if omitted)\n\
           paymentMethodId   Payment method ID\n\
           shippingAddress   {\"name\": \"...\", \"street1\": \"...\", \"city\": \"...\", \"state\": \"...\",\n\
                             \"postalCode\": \"...\", \"country\": \"US\"}\n\
-          billingAddress    Same shape, or {\"sameAsShipping\": true}\n\
+          billingAddress    Same shape as shippingAddress\n\
           promoCodeId       Promo code ID for discount\n\
           shippingMethodId  Shipping method ID\n\n\
         Item fields:\n\
           productId   Product ID (required)\n\
-          variantKey  Variant key (required)\n\
+          variantId   Variant ID (required)\n\
           quantity    Number of units (required)\n\n\
         Example:\n\
         arky order checkout --data '{\n\
-          \"items\": [{\"productId\": \"prod_123\", \"variantKey\": \"default\", \"quantity\": 1}],\n\
+          \"items\": [{\"productId\": \"prod_123\", \"variantId\": \"var_456\", \"quantity\": 1}],\n\
           \"paymentMethodId\": \"pm_card_visa\",\n\
           \"market\": \"us\",\n\
           \"shippingAddress\": {\n\
             \"name\": \"John Doe\", \"street1\": \"123 Main St\",\n\
             \"city\": \"NYC\", \"state\": \"NY\", \"postalCode\": \"10001\", \"country\": \"US\"\n\
           },\n\
-          \"billingAddress\": {\"sameAsShipping\": true}\n\
+          \"billingAddress\": {\"name\": \"John Doe\", \"street1\": \"123 Main St\",\n\
+            \"city\": \"NYC\", \"state\": \"NY\", \"postalCode\": \"10001\", \"country\": \"US\"}\n\
         }'")]
     Checkout {
         #[arg(long, help = "JSON data: inline, @file, or - for stdin")]
