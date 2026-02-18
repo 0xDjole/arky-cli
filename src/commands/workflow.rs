@@ -49,9 +49,10 @@ pub enum WorkflowCommand {
           trigger   Entry point. Receives external data when triggered.\n\
                     Fields: event, schema (Block[] for input validation), delayMs\n\n\
           http      Makes an HTTP request.\n\
-                    Fields: method (get|post|put|delete), url, headers (object),\n\
-                    body (string, supports {{expr}} interpolation), timeoutMs,\n\
-                    integrationId, retries ({count, delayMs, backoff})\n\n\
+                    Required: method (get|post|put|delete), url, headers (object, e.g. {}),\n\
+                    timeoutMs (integer, e.g. 30000), delayMs (integer, e.g. 0)\n\
+                    retries (integer, e.g. 0), retryDelayMs (integer, e.g. 0)\n\
+                    Optional: body (supports {{expr}} interpolation), integrationId\n\n\
           switch    Conditional branching. Evaluates rules in order.\n\
                     Fields: rules [{condition}] — raw JS expressions.\n\
                     Outputs: \"0\", \"1\", ... (rule index) and \"default\".\n\n\
@@ -79,6 +80,8 @@ pub enum WorkflowCommand {
             \"fetch\": {\n\
               \"type\": \"http\", \"method\": \"get\",\n\
               \"url\": \"https://api.example.com/data\",\n\
+              \"headers\": {}, \"timeoutMs\": 30000,\n\
+              \"delayMs\": 0, \"retries\": 0, \"retryDelayMs\": 0,\n\
               \"edges\": [{\"node\": \"trigger\", \"output\": \"default\"}]\n\
             },\n\
             \"process\": {\n\
@@ -98,11 +101,17 @@ pub enum WorkflowCommand {
               \"edges\": [{\"node\": \"trigger\", \"output\": \"default\"}]\n\
             },\n\
             \"premium_action\": {\n\
-              \"type\": \"http\", \"method\": \"post\", \"url\": \"https://api.example.com/premium\",\n\
+              \"type\": \"http\", \"method\": \"post\",\n\
+              \"url\": \"https://api.example.com/premium\",\n\
+              \"headers\": {\"Content-Type\": \"application/json\"},\n\
+              \"timeoutMs\": 30000, \"delayMs\": 0, \"retries\": 0, \"retryDelayMs\": 0,\n\
               \"edges\": [{\"node\": \"check\", \"output\": \"0\"}]\n\
             },\n\
             \"default_action\": {\n\
-              \"type\": \"http\", \"method\": \"post\", \"url\": \"https://api.example.com/basic\",\n\
+              \"type\": \"http\", \"method\": \"post\",\n\
+              \"url\": \"https://api.example.com/basic\",\n\
+              \"headers\": {\"Content-Type\": \"application/json\"},\n\
+              \"timeoutMs\": 30000, \"delayMs\": 0, \"retries\": 0, \"retryDelayMs\": 0,\n\
               \"edges\": [{\"node\": \"check\", \"output\": \"default\"}]\n\
             }\n\
           }\n\
