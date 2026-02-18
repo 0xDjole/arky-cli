@@ -93,33 +93,31 @@ pub enum AudienceCommand {
         #[arg(long)]
         cursor: Option<String>,
     },
-    /// Add a subscriber to an audience by email
+    /// Add a subscriber to an audience
     #[command(name = "add-subscriber", long_about = "Add a subscriber to an audience.\n\n\
         Required:\n\
           AUDIENCE_ID (positional)  The audience to add the subscriber to.\n\
-          --email                   Email address of the subscriber.\n\n\
+          --data JSON               Must include \"email\" field.\n\n\
         If the email is already subscribed, the request is silently skipped.\n\n\
         Example:\n\
-        arky audience add-subscriber AUDIENCE_ID --email user@example.com")]
+        arky audience add-subscriber AUDIENCE_ID --data '{\"email\": \"user@example.com\"}'")]
     AddSubscriber {
         /// Audience ID
         id: String,
-        /// Subscriber email address
-        #[arg(long)]
-        email: String,
+        #[arg(long, help = "JSON data: inline, @file, or - for stdin")]
+        data: Option<String>,
     },
     /// Remove a subscriber from an audience
     #[command(name = "remove-subscriber", long_about = "Remove a subscriber from an audience by account ID.\n\n\
         Required:\n\
           AUDIENCE_ID (positional)  The audience to remove from.\n\
-          --account-id              Account ID of the subscriber (from `arky audience subscribers`).\n\n\
+          ACCOUNT_ID (positional)   Account ID of the subscriber (from `arky audience subscribers`).\n\n\
         Example:\n\
-        arky audience remove-subscriber AUDIENCE_ID --account-id ACC_ID")]
+        arky audience remove-subscriber AUDIENCE_ID ACCOUNT_ID")]
     RemoveSubscriber {
         /// Audience ID
         id: String,
         /// Account ID of the subscriber to remove
-        #[arg(long)]
         account_id: String,
     },
 }
@@ -192,8 +190,8 @@ pub async fn handle(cmd: AudienceCommand, client: &ArkyClient, format: &Format) 
                 .await?;
             crate::output::print_output(&result, format);
         }
-        AudienceCommand::AddSubscriber { id, email } => {
-            let body = json!({ "email": email });
+        AudienceCommand::AddSubscriber { id, data } => {
+            let body = parse_data(data.as_deref())?;
             let result = client
                 .post(
                     &format!("/v1/businesses/{biz_id}/audiences/{id}/subscribers"),

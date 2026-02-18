@@ -8,8 +8,15 @@ use clap::Subcommand;
 pub enum ShippingCommand {
     /// Get shipping rates for an order
     #[command(long_about = "Get available shipping rates for an order.\n\n\
-        Requires shipping provider configuration. Returns available rates\n\
-        from carriers with prices, estimated delivery times.\n\n\
+        Calls your configured shipping provider (e.g. Shippo) to get\n\
+        real-time carrier rates with prices and estimated delivery.\n\n\
+        Find your shippingProviderId: arky business get YOUR_BIZ_ID\n\
+        Look at configs.shippingIds for the integration ID.\n\n\
+        Required (--data JSON):\n\
+          shippingProviderId   Integration ID from your business config\n\
+          fromAddress          Origin address\n\
+          toAddress            Destination address\n\
+          parcel               Package dimensions and weight\n\n\
         Address fields: name, street1, street2 (optional), city, state,\n\
         postalCode, country (ISO 2-letter).\n\n\
         Parcel fields: length, width, height, weight,\n\
@@ -41,7 +48,7 @@ pub enum ShippingCommand {
     },
     /// Ship an order: create shipment + purchase label
     #[command(long_about = "Create a shipment and purchase a shipping label.\n\n\
-        Use a rate ID from `arky shipping rates` to select the carrier/service.\n\n\
+        Use a rateId from `arky shipping rates` to select the carrier/service.\n\n\
         Example:\n\
         arky shipping ship ORDER_ID --data '{\n\
           \"rateId\": \"rate_abc\",\n\
