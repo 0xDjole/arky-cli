@@ -100,7 +100,7 @@ pub enum ProviderCommand {
         arky provider working-time PROVIDER_ID\n\
         arky provider working-time PROVIDER_ID --service-id SVC_ID\n\n\
         Response shape:\n\
-        {\"workingDays\": [{\"day\": \"monday\", \"workingHours\": [{\"from\": 32400000, \"to\": 61200000}]}],\n\
+        {\"workingDays\": [{\"day\": \"monday\", \"workingHours\": [{\"from\": 540, \"to\": 1020}]}],\n\
          \"outcastDates\": [], \"specificDates\": []}")]
     WorkingTime {
         /// Provider ID

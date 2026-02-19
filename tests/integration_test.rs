@@ -394,16 +394,16 @@ fn test_provider_service_flow() {
         "providers": [{
             "providerId": provider_id,
             "prices": [{"currency": "usd", "market": "us", "amount": 5000}],
-            "durations": [{"duration": 3600000, "isPause": false}],
+            "durations": [{"duration": 60, "isPause": false}],
             "isApprovalRequired": false,
             "audienceIds": [],
             "workingTime": {
                 "workingDays": [
-                    {"day": "monday", "workingHours": [{"from": 32400000, "to": 61200000}]},
-                    {"day": "tuesday", "workingHours": [{"from": 32400000, "to": 61200000}]},
-                    {"day": "wednesday", "workingHours": [{"from": 32400000, "to": 61200000}]},
-                    {"day": "thursday", "workingHours": [{"from": 32400000, "to": 61200000}]},
-                    {"day": "friday", "workingHours": [{"from": 32400000, "to": 61200000}]}
+                    {"day": "monday", "workingHours": [{"from": 540, "to": 1020}]},
+                    {"day": "tuesday", "workingHours": [{"from": 540, "to": 1020}]},
+                    {"day": "wednesday", "workingHours": [{"from": 540, "to": 1020}]},
+                    {"day": "thursday", "workingHours": [{"from": 540, "to": 1020}]},
+                    {"day": "friday", "workingHours": [{"from": 540, "to": 1020}]}
                 ],
                 "outcastDates": [],
                 "specificDates": []
