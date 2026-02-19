@@ -86,7 +86,7 @@ pub enum NodeCommand {
       list              [{sub-block}, ...]\n\
       map               {key: sub-block}\n\
       relationship_entry  {\"id\": \"node_123\"}\n\
-      relationship_media  {\"id\": \"media_123\"}\n\
+      relationship_media  value must be format \"media:<uuid>\" (e.g. \"media:550e8400-...\")\n\
       geo_location        {\"coordinates\": {\"lat\": 43.85, \"lon\": 18.41}}\n\n\
     Data input:\n\
       --data '{...}'    Inline JSON\n\
@@ -115,12 +115,16 @@ pub enum NodeCommand {
     /// Update a content node
     #[command(long_about = "Update a content node.\n\n\
     Required (--data JSON):\n\
-      key           Node key (must match existing)\n\
+      key           Node key — letters, numbers, _ and - only, max 255 chars.\n\
       slug          Localized slug object: {\"en\": \"my-page\"}\n\
       status        \"draft\" | \"active\" | \"archived\"\n\
       writeAccess   \"public\" or \"private\"\n\
       audienceIds   Array of audience IDs (use [] if none)\n\
       blocks        Array of blocks — REPLACES entire array, include all you want to keep\n\n\
+    Validation:\n\
+      - Key must be URL-safe (letters, numbers, _ and -), max 255 chars.\n\
+      - relationship_media values must be format \"media:<uuid>\".\n\
+        Invalid references are rejected.\n\n\
     Each block needs: type, id, key, properties, value (same as create).\n\
     Block types: localized_text, markdown, number, boolean, text, list, map,\n\
     relationship_entry, relationship_media, geo_location\n\n\

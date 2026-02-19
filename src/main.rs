@@ -65,6 +65,15 @@ use commands::{
 ///   - Shipping provider IDs come from business configs.shippingIds
 ///     (find via: arky business get YOUR_BIZ_ID).
 ///
+/// Validation rules:
+///   - Switch node conditions must reference `input` (e.g. input.amount > 100).
+///     Conditions without `input` are rejected at create/update time.
+///   - Media references must use format `media:<uuid>` (e.g. media:550e8400-...).
+///     Invalid formats or non-UUID values are rejected.
+///   - Node keys must be URL-safe (letters, numbers, _ and -), max 255 chars.
+///     Enforced on both create and update.
+///   - Zones/locations must be configured in business settings before accepting orders.
+///
 /// Block system (used by nodes, products, services, providers):
 ///   Every block needs: type, id, key, properties (usually {}), value
 ///   Types: localized_text, markdown, number, boolean, text, list, map,

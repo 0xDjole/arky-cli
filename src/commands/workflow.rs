@@ -55,6 +55,7 @@ pub enum WorkflowCommand {
                     Optional: body (supports {{expr}} interpolation), integrationId\n\n\
           switch    Conditional branching. Evaluates rules in order.\n\
                     Fields: rules [{condition}] — raw JS expressions.\n\
+                    Conditions MUST reference `input` (e.g. input.status === \"active\").\n\
                     Outputs: \"0\", \"1\", ... (rule index) and \"default\".\n\n\
           transform Data transformation.\n\
                     Fields: code — raw JS that returns a value.\n\
@@ -69,7 +70,7 @@ pub enum WorkflowCommand {
           Common outputs: \"default\" (main output), \"each\" (loop item)\n\
           Switch outputs: \"0\", \"1\", \"2\", ... (rule index), \"default\"\n\n\
         Expression engine (JS via boa runtime):\n\
-          Switch conditions: raw JS — trigger.status === \"active\"\n\
+          Switch conditions: raw JS, must use `input` — input.status === \"active\"\n\
           Transform code: raw JS — fetch.data.map(x => x.name)\n\
           HTTP body: {{expression}} template interpolation\n\
           Loop expression: raw JS returning array — trigger.items\n\n\
@@ -97,7 +98,7 @@ pub enum WorkflowCommand {
             \"trigger\": {\"type\": \"trigger\"},\n\
             \"check\": {\n\
               \"type\": \"switch\",\n\
-              \"rules\": [{\"condition\": \"trigger.type === \\\"premium\\\"\"}],\n\
+              \"rules\": [{\"condition\": \"input.type === \\\"premium\\\"\"}],\n\
               \"edges\": [{\"node\": \"trigger\", \"output\": \"default\"}]\n\
             },\n\
             \"premium_action\": {\n\
