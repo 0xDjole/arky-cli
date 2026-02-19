@@ -57,10 +57,8 @@ pub enum PromoCodeCommand {
           min_order_amount  Minimum order amount (in cents)\n\
           date_range        {\"start\": timestamp, \"end\": timestamp}\n\
           max_uses          Maximum total uses across all customers\n\
-          max_uses_per_user Maximum uses per individual customer\n\n\
         Condition value format (adjacently tagged):\n\
           max_uses:          {\"type\": \"count\", \"value\": 50}\n\
-          max_uses_per_user: {\"type\": \"count\", \"value\": 5}\n\
           min_order_amount:  {\"type\": \"amount\", \"value\": 5000}\n\
           products:          {\"type\": \"ids\", \"value\": [\"prod_1\", \"prod_2\"]}\n\
           date_range:        {\"type\": \"range\", \"value\": {\"start\": 1704067200000, \"end\": 1706745600000}}\n\n\
@@ -97,10 +95,7 @@ pub async fn handle(cmd: PromoCodeCommand, client: &ArkyClient, format: &Format)
     match cmd {
         PromoCodeCommand::Get { id } => {
             let result = client
-                .get(
-                    &format!("/v1/businesses/{biz_id}/promo-codes/{id}"),
-                    &[],
-                )
+                .get(&format!("/v1/businesses/{biz_id}/promo-codes/{id}"), &[])
                 .await?;
             crate::output::print_output(&result, format);
         }
@@ -123,10 +118,7 @@ pub async fn handle(cmd: PromoCodeCommand, client: &ArkyClient, format: &Format)
             let params_ref: Vec<(&str, &str)> =
                 params.iter().map(|(k, v)| (*k, v.as_str())).collect();
             let result = client
-                .get(
-                    &format!("/v1/businesses/{biz_id}/promo-codes"),
-                    &params_ref,
-                )
+                .get(&format!("/v1/businesses/{biz_id}/promo-codes"), &params_ref)
                 .await?;
             crate::output::print_output(&result, format);
         }
@@ -135,10 +127,7 @@ pub async fn handle(cmd: PromoCodeCommand, client: &ArkyClient, format: &Format)
             let overlay = parse_data(data.as_deref())?;
             merge_data(&mut body, overlay);
             let result = client
-                .post(
-                    &format!("/v1/businesses/{biz_id}/promo-codes"),
-                    &body,
-                )
+                .post(&format!("/v1/businesses/{biz_id}/promo-codes"), &body)
                 .await?;
             crate::output::print_output(&result, format);
         }
@@ -147,10 +136,7 @@ pub async fn handle(cmd: PromoCodeCommand, client: &ArkyClient, format: &Format)
             let overlay = parse_data(data.as_deref())?;
             merge_data(&mut body, overlay);
             let result = client
-                .put(
-                    &format!("/v1/businesses/{biz_id}/promo-codes/{id}"),
-                    &body,
-                )
+                .put(&format!("/v1/businesses/{biz_id}/promo-codes/{id}"), &body)
                 .await?;
             crate::output::print_output(&result, format);
         }
