@@ -6,7 +6,7 @@ mod output;
 
 use clap::{Parser, Subcommand};
 use commands::{
-    account::AccountCommand, audience::AudienceCommand, auth::AuthCommand,
+    account::AccountCommand, agent::AgentCommand, audience::AudienceCommand, auth::AuthCommand,
     booking::BookingCommand, business::BusinessCommand, config_cmd::ConfigCommand,
     media::MediaCommand,
     network::NetworkCommand, node::NodeCommand, notification::NotificationCommand,
@@ -103,6 +103,11 @@ struct Cli {
 
 #[derive(Subcommand, Debug)]
 enum Command {
+    /// Manage AI agents
+    Agent {
+        #[command(subcommand)]
+        cmd: AgentCommand,
+    },
     /// Authentication: login, verify, session
     Auth {
         #[command(subcommand)]
@@ -216,6 +221,7 @@ async fn main() {
     );
 
     let result = match cli.command {
+        Command::Agent { cmd } => commands::agent::handle(cmd, &client, &format).await,
         Command::Auth { cmd } => commands::auth::handle(cmd, &client, &format).await,
         Command::Config { cmd } => commands::config_cmd::handle(cmd, &resolved, &format).await,
         Command::Business { cmd } => commands::business::handle(cmd, &client, &format).await,
