@@ -43,8 +43,7 @@ pub enum BusinessCommand {
           currencies        [{\"code\": \"usd\", \"symbol\": \"$\"}]\n\
           markets           [{\"id\": \"us\", \"name\": \"United States\", \"currencies\": [\"usd\"], ...}]\n\
           locations         [] (warehouse/pickup locations)\n\
-          paymentProviders  [] (Stripe, etc.)\n\
-          shippingProviders [] (shipping integrations)\n\
+          integrations      [] (Stripe, Shippo, etc. — use activeForCardPayments/activeForFulfillment flags)\n\
           emails            {\"billing\": \"you@example.com\", \"support\": \"you@example.com\"}\n\n\
         Working example (from integration tests):\n\
         arky business create my-shop --data '{\n\

@@ -11,7 +11,7 @@ pub enum ShippingCommand {
         Calls your configured shipping provider (e.g. Shippo) to get\n\
         real-time carrier rates with prices and estimated delivery.\n\n\
         Find your shippingProviderId: arky business get YOUR_BIZ_ID\n\
-        Look at configs.shippingIds for the integration ID.\n\n\
+        Look for Shippo integrations with activeForFulfillment: true.\n\n\
         Required (--data JSON):\n\
           shippingProviderId   Integration ID from your business config\n\
           fromAddress          Origin address\n\
